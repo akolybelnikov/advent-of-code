@@ -1,7 +1,7 @@
 package advent_test
 
 import (
-	a "scripts/advent"
+	a "github.com/akolybelnikov/advent-of-code"
 	"testing"
 )
 

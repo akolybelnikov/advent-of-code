@@ -1,10 +1,10 @@
 package advent_test
 
 import (
+	a "github.com/akolybelnikov/advent-of-code"
 	dijkstrapath "github.com/kirves/godijkstra/common/path"
 	"github.com/kirves/godijkstra/dijkstra"
 	"github.com/stretchr/testify/assert"
-	a "scripts/advent"
 	"testing"
 )
 
