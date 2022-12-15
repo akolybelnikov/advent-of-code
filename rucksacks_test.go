@@ -1,8 +1,8 @@
 package advent_test
 
 import (
+	a "github.com/akolybelnikov/advent-of-code"
 	"github.com/go-playground/assert/v2"
-	a "scripts/advent"
 	"testing"
 )
 
