@@ -49,7 +49,7 @@ func HandleBytes(data []byte, fn handlerFunc) (int, error) {
 	return total, nil
 }
 
-func handleByteGroups(data []byte, fn groupHandlerFunction, groupSize int) (int, error) {
+func HandleByteGroups(data []byte, fn groupHandlerFunction, groupSize int) (int, error) {
 	var total, nLine, prevIdx, count int
 	group := make([][]byte, groupSize, groupSize)
 
