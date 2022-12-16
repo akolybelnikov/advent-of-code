@@ -1,4 +1,3 @@
-// Package advent Day 1
 package advent
 
 import (
@@ -9,6 +8,8 @@ import (
 	"strconv"
 	"strings"
 )
+
+const newline = 10
 
 type Elf struct {
 	Calories int
