@@ -61,9 +61,9 @@ func findPairs(data []byte) ([4]int, error) {
 }
 
 func FindContainedPairs(data []byte) (int, error) {
-	return handleBytes(data, contain)
+	return HandleBytes(data, contain)
 }
 
 func FindOverlappingPairs(data []byte) (int, error) {
-	return handleBytes(data, overlap)
+	return HandleBytes(data, overlap)
 }

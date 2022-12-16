@@ -3,6 +3,7 @@ package advent
 
 import (
 	"fmt"
+	a "github.com/akolybelnikov/advent-of-code"
 )
 
 const (
@@ -27,11 +28,11 @@ const (
 )
 
 func FindMyStrategyTotal(data []byte) (int, error) {
-	return handleBytes(data, myGameScore)
+	return a.HandleBytes(data, myGameScore)
 }
 
 func FindElfStrategyTotal(data []byte) (int, error) {
-	return handleBytes(data, elfGameScore)
+	return a.HandleBytes(data, elfGameScore)
 }
 
 func myHand(b byte) (int, error) {

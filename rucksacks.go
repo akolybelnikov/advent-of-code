@@ -126,7 +126,7 @@ func intersection(pS ...[]byte) (byte, error) {
 }
 
 func FindTotalPriorities(data []byte) (int, error) {
-	return handleBytes(data, findDuplicatePriority)
+	return HandleBytes(data, findDuplicatePriority)
 }
 
 func FindTotalBadges(data []byte) (int, error) {
