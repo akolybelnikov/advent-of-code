@@ -26,7 +26,7 @@ func ReadDataBytes(filename string) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func handleBytes(data []byte, fn handlerFunc) (int, error) {
+func HandleBytes(data []byte, fn handlerFunc) (int, error) {
 	var total, nLine, prevIdx int
 
 	for byteIndex, b := range data {
