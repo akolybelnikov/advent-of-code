@@ -8,7 +8,6 @@ const (
 )
 
 type element struct {
-	id     string
 	kind   int
 	value  int
 	nested []*element

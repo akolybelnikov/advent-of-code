@@ -33,3 +33,17 @@ func TestComparePackets2(t *testing.T) {
 
 	assert.Equal(t, 21909, result)
 }
+
+func BenchmarkComparePart1(b *testing.B) {
+	data, _ := a.ReadDataBytes("testdata/distress_signal/input.txt")
+	for i := 0; i < b.N; i++ {
+		_ = a.HandlePacketsPart1(&data)
+	}
+}
+
+func BenchmarkComparePart2(b *testing.B) {
+	data, _ := a.ReadDataBytes("testdata/distress_signal/input.txt")
+	for i := 0; i < b.N; i++ {
+		_ = a.HandlePacketsPart2(&data)
+	}
+}
