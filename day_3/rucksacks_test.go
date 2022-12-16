@@ -2,14 +2,15 @@ package advent_test
 
 import (
 	a "github.com/akolybelnikov/advent-of-code"
+	c "github.com/akolybelnikov/advent-of-code/day_3"
 	"github.com/go-playground/assert/v2"
 	"testing"
 )
 
 func TestFindTotalPriorities(t *testing.T) {
 	t.Run("should handle default input", func(t *testing.T) {
-		data, _ := a.ReadDataBytes("testdata/rucksack/input.txt")
-		total, err := a.FindTotalPriorities(data)
+		data, _ := a.ReadDataBytes("testdata/input.txt")
+		total, err := c.FindTotalPriorities(data)
 
 		if err != nil {
 			t.Errorf("encountered error %v", err)
@@ -20,8 +21,8 @@ func TestFindTotalPriorities(t *testing.T) {
 
 func TestFindTotalBadges(t *testing.T) {
 	t.Run("should handle the default input", func(t *testing.T) {
-		data, _ := a.ReadDataBytes("testdata/rucksack/input.txt")
-		total, err := a.FindTotalBadges(data)
+		data, _ := a.ReadDataBytes("testdata/input.txt")
+		total, err := c.FindTotalBadges(data)
 
 		if err != nil {
 			t.Errorf("encountered error %v", err)
@@ -30,8 +31,8 @@ func TestFindTotalBadges(t *testing.T) {
 	})
 
 	t.Run("should find a duplicate badge", func(t *testing.T) {
-		data, _ := a.ReadDataBytes("testdata/rucksack/dup_badge_input.txt")
-		_, err := a.FindTotalBadges(data)
+		data, _ := a.ReadDataBytes("testdata/dup_badge_input.txt")
+		_, err := c.FindTotalBadges(data)
 
 		assert.NotEqual(t, err, nil)
 	})

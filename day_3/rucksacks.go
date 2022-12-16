@@ -3,6 +3,7 @@ package advent
 
 import (
 	"fmt"
+	a "github.com/akolybelnikov/advent-of-code"
 )
 
 var priorities = map[int]int{
@@ -126,9 +127,9 @@ func intersection(pS ...[]byte) (byte, error) {
 }
 
 func FindTotalPriorities(data []byte) (int, error) {
-	return HandleBytes(data, findDuplicatePriority)
+	return a.HandleBytes(data, findDuplicatePriority)
 }
 
 func FindTotalBadges(data []byte) (int, error) {
-	return handleByteGroups(data, findGroupBadge, 3)
+	return a.HandleByteGroups(data, findGroupBadge, 3)
 }
