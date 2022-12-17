@@ -1,5 +1,4 @@
-// Package advent Day 5
-package advent
+package day_5
 
 import (
 	"fmt"
@@ -7,7 +6,10 @@ import (
 	"strings"
 )
 
-const space = 32
+const (
+	newline = 10
+	space   = 32
+)
 
 type makeMove func(*[]byte, *[][]byte) error
 
