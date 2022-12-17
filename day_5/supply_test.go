@@ -1,14 +1,15 @@
-package advent_test
+package day_5_test
 
 import (
-	a "github.com/akolybelnikov/advent-of-code"
+	utils "github.com/akolybelnikov/advent-of-code"
+	a "github.com/akolybelnikov/advent-of-code/day_5"
 	"github.com/go-playground/assert/v2"
 	"testing"
 )
 
 func TestFindCrates9000(t *testing.T) {
 	t.Run("should find top crates in the last state", func(t *testing.T) {
-		data, err := a.ReadDataBytes("testdata/supply/input.txt")
+		data, err := utils.ReadDataBytes("testdata/input.txt")
 		if err != nil {
 			t.Errorf("error reading data bytes: %v", err)
 		}
@@ -30,7 +31,7 @@ func TestFindCrates9000(t *testing.T) {
 
 func TestFindCrates9001(t *testing.T) {
 	t.Run("should find top crates in the last state", func(t *testing.T) {
-		data, err := a.ReadDataBytes("testdata/supply/input.txt")
+		data, err := utils.ReadDataBytes("testdata/input.txt")
 		if err != nil {
 			t.Errorf("error reading data bytes: %v", err)
 		}
