@@ -60,7 +60,7 @@ func (s *state) move(d *direction) {
 func (s *state) moveTail() {
 	for i := 1; i < len(s.knots); i++ {
 		delta := &position{s.knots[i-1].x - s.knots[i].x, s.knots[i-1].y - s.knots[i].y}
-		if abs(delta.x) <= 1 && abs(delta.y) <= 1 {
+		if Abs(delta.x) <= 1 && Abs(delta.y) <= 1 {
 			return
 		}
 		if delta.y > 0 {

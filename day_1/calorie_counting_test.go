@@ -1,4 +1,4 @@
-package advent_test
+package day_1_test
 
 import (
 	a "github.com/akolybelnikov/advent-of-code"

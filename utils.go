@@ -26,6 +26,26 @@ func ReadDataBytes(filename string) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+func MakeBytesArray(data *[]byte) (*[]*[]byte, error) {
+	var nLine, prevIdx int
+	res := make([]*[]byte, 0)
+
+	for byteIndex, b := range *data {
+		if b == newline {
+			nLine++
+			if nLine == 1 && prevIdx != byteIndex {
+				bs := (*data)[prevIdx:byteIndex]
+				res = append(res, &bs)
+			}
+			prevIdx = byteIndex + 1
+		} else {
+			nLine = 0
+		}
+	}
+
+	return &res, nil
+}
+
 func HandleBytes(data []byte, fn handlerFunc) (int, error) {
 	var total, nLine, prevIdx int
 
@@ -79,7 +99,7 @@ func HandleByteGroups(data []byte, fn groupHandlerFunction, groupSize int) (int,
 	return total, nil
 }
 
-func abs(x int) int {
+func Abs(x int) int {
 	if x < 0 {
 		return -x
 	}
