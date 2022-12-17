@@ -1,7 +1,9 @@
-// Package advent Day 4
-package advent
+package day_4
 
-import "strconv"
+import (
+	a "github.com/akolybelnikov/advent-of-code"
+	"strconv"
+)
 
 const (
 	comma  = 44
@@ -61,9 +63,9 @@ func findPairs(data []byte) ([4]int, error) {
 }
 
 func FindContainedPairs(data []byte) (int, error) {
-	return HandleBytes(data, contain)
+	return a.HandleBytes(data, contain)
 }
 
 func FindOverlappingPairs(data []byte) (int, error) {
-	return HandleBytes(data, overlap)
+	return a.HandleBytes(data, overlap)
 }
