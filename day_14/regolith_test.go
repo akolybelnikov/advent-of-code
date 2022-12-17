@@ -14,7 +14,6 @@ func TestMakeGridTestInput(t *testing.T) {
 	bytesArray, _ := a.MakeBytesArray(&data)
 	grid, leftEdge, rightEdge := c.MakeGrid(bytesArray)
 	count := grid.DropSand(leftEdge, rightEdge)
-	grid.Render()
 	assert.Equal(t, 24, count)
 }
 
@@ -26,4 +25,22 @@ func TestMakeGrid(t *testing.T) {
 	count := grid.DropSand(leftEdge, rightEdge)
 	fmt.Println(time.Since(start))
 	assert.Equal(t, 672, count)
+}
+
+func TestMakeGridPart2TestInput(t *testing.T) {
+	data, _ := a.ReadDataBytes("testdata/test_input.txt")
+	bytesArray, _ := a.MakeBytesArray(&data)
+	grid, _, _ := c.MakeGrid(bytesArray)
+	count := grid.DropSandPart2()
+	assert.Equal(t, 93, count)
+}
+
+func TestMakeGridPart2(t *testing.T) {
+	start := time.Now()
+	data, _ := a.ReadDataBytes("testdata/input.txt")
+	bytesArray, _ := a.MakeBytesArray(&data)
+	grid, _, _ := c.MakeGrid(bytesArray)
+	count := grid.DropSandPart2()
+	fmt.Println(time.Since(start))
+	assert.Equal(t, 26831, count)
 }

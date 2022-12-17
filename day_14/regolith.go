@@ -23,12 +23,12 @@ type line struct {
 
 func MakeGrid(data *[]*[]byte) (*Grid, int, int) {
 	grid := make(Grid, 0)
-	var leftEdge, rightEdge int
+	var leftEdge, rightEdge, longest int
 
 	for i, dataRow := range *data {
 		p := path(dataRow)
 		lines := makeLines(p)
-		l, r := grid.addPath(lines)
+		l, r, lg := grid.addPath(lines)
 		if i == 0 {
 			leftEdge = l
 		}
@@ -38,6 +38,22 @@ func MakeGrid(data *[]*[]byte) (*Grid, int, int) {
 		if r > rightEdge {
 			rightEdge = r
 		}
+		if longest < lg {
+			longest = lg
+		}
+	}
+
+	for i := 0; i < 500; i++ {
+		row := make([]byte, 0)
+		grid = append(grid, &row)
+	}
+
+	for j := 0; j < len(grid); j++ {
+		l := len(*grid[j])
+		for i := 0; i <= (longest+2)-l; i++ {
+			*grid[j] = append(*grid[j], AIR)
+		}
+		(*grid[j])[longest+2] = ROCK
 	}
 
 	return &grid, leftEdge, rightEdge
@@ -59,10 +75,17 @@ func (g *Grid) addCols(s *step) {
 	}
 }
 
-func (g *Grid) addPath(lines []*line) (int, int) {
+func (g *Grid) addPath(lines []*line) (int, int, int) {
 	left := lines[0].from[0]
 	right := left
+	var longest int
 	for _, l := range lines {
+		if longest < l.from[1] {
+			longest = l.from[1]
+		}
+		if longest < l.to[1] {
+			longest = l.to[1]
+		}
 		if l.is == HOR {
 			s, e := l.from, l.to
 			if l.to[1] < l.from[1] {
@@ -105,16 +128,16 @@ func (g *Grid) addPath(lines []*line) (int, int) {
 		}
 	}
 
-	return left, right
+	return left, right, longest
 }
 
 func (g *Grid) DropSand(leftEdge, rightEdge int) int {
 	var count, idx2 int
-	var idx1 = 100
+	var idx1 = 500
 
 	for idx1 >= leftEdge && idx1 <= rightEdge {
 		count++
-		idx1 = 100
+		idx1 = 500
 		idx2 = 0
 		cur := (*(*g)[idx1])[idx2]
 		for cur != SAND && (idx1 >= leftEdge && idx1 <= rightEdge) {
@@ -152,15 +175,47 @@ func (g *Grid) DropSand(leftEdge, rightEdge int) int {
 	return count - 1
 }
 
+func (g *Grid) DropSandPart2() int {
+	var count, idx2 int
+	var idx1 = 500
+
+	for (*(*g)[500])[0] != SAND {
+		count++
+		idx1 = 500
+		idx2 = 0
+		cur := (*(*g)[idx1])[idx2]
+		for cur != SAND {
+			next := (*(*g)[idx1])[idx2+1]
+			switch {
+			case next == AIR:
+				idx2++
+			case next == ROCK || next == SAND:
+				nextLeft := (*(*g)[idx1-1])[idx2+1]
+				if nextLeft == AIR {
+					idx1--
+					idx2++
+					continue
+				}
+				nextRight := (*(*g)[idx1+1])[idx2+1]
+				if nextRight == AIR {
+					idx1++
+					idx2++
+					continue
+				}
+				cur = SAND
+				(*(*g)[idx1])[idx2] = SAND
+			}
+		}
+	}
+
+	return count
+}
+
 func (g *Grid) Render() {
+	log.Println()
 	cols := make([][]byte, 0)
 	for _, row := range *g {
 		if len(*row) > 0 {
-			if len(*row) < len(cols) {
-				for i := len(*row); i < len(cols); i++ {
-					*row = append(*row, AIR)
-				}
-			}
 			for ci, col := range *row {
 				if len(cols) == ci {
 					cols = append(cols, make([]byte, 0))
@@ -199,7 +254,7 @@ func parseStep(data []byte) *step {
 		val = val*10 + int(data[cur]-48)
 		cur++
 	}
-	res[0] = val % 400
+	res[0] = val
 	cur++
 	val = 0
 	for cur < len(data) {
