@@ -1,5 +1,4 @@
-// Package advent Day 2
-package advent
+package day_2
 
 import (
 	"fmt"

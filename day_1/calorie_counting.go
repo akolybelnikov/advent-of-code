@@ -1,4 +1,4 @@
-package advent
+package day_1
 
 import (
 	"bufio"
