@@ -1,5 +1,6 @@
-// Package advent Day 6
-package advent
+package day_6
+
+const newline = 10
 
 type markerHandler func(*[]byte) int
 
