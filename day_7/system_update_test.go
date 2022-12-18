@@ -1,13 +1,14 @@
 package advent_test
 
 import (
-	a "github.com/akolybelnikov/advent-of-code"
+	utils "github.com/akolybelnikov/advent-of-code"
+	a "github.com/akolybelnikov/advent-of-code/day_7"
 	"testing"
 )
 
 func TestTraverseDirs(t *testing.T) {
 	t.Run("traverse default input", func(t *testing.T) {
-		data, _ := a.ReadDataBytes("testdata/system_update/input.txt")
+		data, _ := utils.ReadDataBytes("testdata/input.txt")
 		root, err := a.TraverseDirs(&data)
 		if err != nil {
 			t.Fatalf("returned an error: %v", err)

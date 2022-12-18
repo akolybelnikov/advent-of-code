@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-const newline = 10
+const NEWLINE = 10
 
 type handlerFunc func(data []byte) (int, error)
 type groupHandlerFunction func(group ...[]byte) (int, error)
@@ -31,7 +31,7 @@ func MakeBytesArray(data *[]byte) (*[]*[]byte, error) {
 	res := make([]*[]byte, 0)
 
 	for byteIndex, b := range *data {
-		if b == newline {
+		if b == NEWLINE {
 			nLine++
 			if nLine == 1 && prevIdx != byteIndex {
 				bs := (*data)[prevIdx:byteIndex]
@@ -50,7 +50,7 @@ func HandleBytes(data []byte, fn handlerFunc) (int, error) {
 	var total, nLine, prevIdx int
 
 	for byteIndex, b := range data {
-		if b == newline {
+		if b == NEWLINE {
 			nLine++
 			if nLine == 1 && prevIdx != byteIndex {
 				bs := data[prevIdx:byteIndex]
@@ -74,7 +74,7 @@ func HandleByteGroups(data []byte, fn groupHandlerFunction, groupSize int) (int,
 	group := make([][]byte, groupSize, groupSize)
 
 	for byteIndex, b := range data {
-		if b == newline {
+		if b == NEWLINE {
 			nLine++
 			if nLine == 1 && prevIdx != byteIndex {
 				bs := data[prevIdx:byteIndex]
