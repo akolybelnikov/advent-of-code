@@ -24,7 +24,7 @@ func TestInputBeacons(t *testing.T) {
 			&day_15.Pos{X: 2, Y: 10}, // beacon
 		}
 		assert.Equal(t, 9, p.ManhattanDist())
-		assert.Equal(t, 13, len(*p.Coverage(10)))
+		assert.Equal(t, 12, len(*p.Coverage(10)))
 		assert.Equal(t, 19, len(*p.Coverage(7)))
 		assert.Equal(t, 1, len(*p.Coverage(16)))
 		assert.Equal(t, 1, len(*p.Coverage(-2)))
@@ -48,6 +48,11 @@ func TestInputBeacons(t *testing.T) {
 		covered := day_15.FindCoverageForRow(pairs, 10)
 		assert.Equal(t, 26, covered)
 	})
+
+	t.Run("test for coverage concurrently", func(t *testing.T) {
+		covered := day_15.FindCoverageForRowConcurrent(pairs, 10)
+		assert.Equal(t, 26, covered)
+	})
 }
 
 func TestFindCoverageForRow(t *testing.T) {
@@ -62,6 +67,20 @@ func TestFindCoverageForRow(t *testing.T) {
 	t.Run("test for coverage by all sensors in the index row", func(t *testing.T) {
 		start := time.Now()
 		covered := day_15.FindCoverageForRow(pairs, 2000000)
+		fmt.Println(time.Since(start))
+		assert.Equal(t, 5367037, covered)
+		//})
+		//
+		//t.Run("test for coverage by all sensors in the index row", func(t *testing.T) {
+		start = time.Now()
+		covered = day_15.FindCoverageForRowConcurrent(pairs, 2000000)
+		fmt.Println(time.Since(start))
+		assert.Equal(t, 5367037, covered)
+		//})
+		//
+		//t.Run("test for coverage by all sensors in the index row", func(t *testing.T) {
+		start = time.Now()
+		covered = day_15.FindCoverageForRowSyncMap(pairs, 2000000)
 		fmt.Println(time.Since(start))
 		assert.Equal(t, 5367037, covered)
 	})
