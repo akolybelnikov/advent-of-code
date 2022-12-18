@@ -2,6 +2,7 @@ package day_15
 
 import (
 	utils "github.com/akolybelnikov/advent-of-code"
+	"sync"
 )
 
 // For each line:
@@ -17,6 +18,19 @@ type Pos struct {
 }
 type Pair [2]*Pos
 
+type CoverageMap struct {
+	lock    sync.RWMutex
+	covered map[int]int
+}
+
+func (m *CoverageMap) addPositions(pos *[]int) {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+	for _, p := range *pos {
+		m.covered[p]++
+	}
+}
+
 func ProcessData(data *[]*[]byte) *[]*Pair {
 	pairs := make([]*Pair, 0)
 	for _, line := range *data {
@@ -27,7 +41,7 @@ func ProcessData(data *[]*[]byte) *[]*Pair {
 }
 
 func FindCoverageForRow(pairs *[]*Pair, y int) int {
-	covered := make(map[int]int, 0)
+	covered := make(map[int]int)
 	for _, pair := range *pairs {
 		c := pair.Coverage(y)
 		for _, pos := range *c {
@@ -38,6 +52,52 @@ func FindCoverageForRow(pairs *[]*Pair, y int) int {
 	return len(covered)
 }
 
+func FindCoverageForRowSyncMap(pairs *[]*Pair, y int) int {
+	var wg sync.WaitGroup
+	var m sync.Map
+	var res int
+
+	for _, pair := range *pairs {
+		wg.Add(1)
+		pair := pair
+		go func() {
+			c := pair.Coverage(y)
+			for _, pos := range *c {
+				m.Store(pos, struct{}{})
+			}
+			wg.Done()
+		}()
+	}
+
+	wg.Wait()
+
+	m.Range(func(k, v any) bool {
+		res++
+		return true
+	})
+
+	return res
+}
+
+func FindCoverageForRowConcurrent(pairs *[]*Pair, y int) int {
+	var wg sync.WaitGroup
+	m := CoverageMap{covered: make(map[int]int)}
+
+	for _, pair := range *pairs {
+		wg.Add(1)
+		pair := pair
+		go func() {
+			c := pair.Coverage(y)
+			m.addPositions(c)
+			wg.Done()
+		}()
+	}
+
+	wg.Wait()
+
+	return len(m.covered)
+}
+
 func (p *Pair) ManhattanDist() int {
 	return utils.Abs(p[0].X-p[1].X) + utils.Abs(p[0].Y-p[1].Y)
 }
@@ -45,39 +105,34 @@ func (p *Pair) ManhattanDist() int {
 func (p *Pair) Coverage(y int) *[]int {
 	ps := make([]int, 0)
 	md := p.ManhattanDist()
-	// middle row only if sensor's Y coordinate is in the index row
-	if p[0].Y == y {
-		for i := p[0].X - md; i <= p[0].X+md; i++ {
-			if p[1].X == i && p[1].Y == y {
-				continue
-			}
-			ps = append(ps, i)
-		}
-		return &ps
-	}
-
+	// return early if index row not covered at all
 	top, btm := p[0].Y-md, p[0].Y+md
 	if y < top || y > btm {
 		return &ps
 	}
-
+	var m int
+	// middle row if sensor's Y coordinate is in the index row
+	if p[0].Y == y {
+		m = md
+	}
+	// index row in upper pyramid
 	if y >= top && y < p[0].Y {
-		// row in upper pyramid
-		m := y - p[0].Y + md
-		for j := p[0].X - m; j <= p[0].X+m; j++ {
-			if p[1].X == j && p[1].Y == y {
-				continue
-			}
-			ps = append(ps, j)
+		m = y - p[0].Y + md
+		// index row in lower pyramid
+	} else {
+		m = p[0].Y + md - y
+	}
+
+	if p[1].Y == y {
+		for i := p[0].X - m; i < p[1].X; i++ {
+			ps = append(ps, i)
+		}
+		for i := p[1].X + 1; i <= p[0].X+m; i++ {
+			ps = append(ps, i)
 		}
 	} else {
-		// row in lower pyramid
-		m := p[0].Y + md - y
-		for j := p[0].X - m; j <= p[0].X+m; j++ {
-			if p[1].X == j && p[1].Y == y {
-				continue
-			}
-			ps = append(ps, j)
+		for i := p[0].X - m; i <= p[0].X+m; i++ {
+			ps = append(ps, i)
 		}
 	}
 
