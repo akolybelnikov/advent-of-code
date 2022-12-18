@@ -82,7 +82,7 @@ func VisitedPositions(data *[]byte, numKnots int) (int, error) {
 	s := initState(numKnots)
 
 	for byteIndex, b := range *data {
-		if b == newline {
+		if b == NEWLINE {
 			line++
 			if line == 1 && prevIdx != byteIndex {
 				nextStep := (*data)[prevIdx:byteIndex]

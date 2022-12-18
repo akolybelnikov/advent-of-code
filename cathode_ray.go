@@ -47,7 +47,7 @@ func SignalStrength(data *[]byte) (*CPU, error) {
 	c := initCPU()
 
 	for byteIndex, b := range *data {
-		if b == newline {
+		if b == NEWLINE {
 			line++
 			if line == 1 && prevIdx != byteIndex {
 				nextInstruction := (*data)[prevIdx:byteIndex]

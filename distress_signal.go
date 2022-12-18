@@ -19,7 +19,7 @@ func HandlePacketsPart1(data *[]byte) int {
 	var res int
 
 	for byteIndex, b := range *data {
-		if b == newline {
+		if b == NEWLINE {
 			lineNumber++
 			if lineNumber == 1 && prevIdx != byteIndex {
 				packetLine := (*data)[prevIdx:byteIndex]
@@ -53,7 +53,7 @@ func HandlePacketsPart2(data *[]byte) int {
 	elements := make([]*element, 0)
 
 	for byteIndex, b := range *data {
-		if b == newline {
+		if b == NEWLINE {
 			lineNumber++
 			if lineNumber == 1 && prevIdx != byteIndex {
 				packetLine := (*data)[prevIdx:byteIndex]

@@ -4,6 +4,7 @@ package advent
 import (
 	"errors"
 	"fmt"
+	utils "github.com/akolybelnikov/advent-of-code"
 	"sort"
 	"strconv"
 	"strings"
@@ -49,7 +50,7 @@ func TraverseDirs(data *[]byte) (*Dir, error) {
 	var curDir = rootDir
 
 	for byteIndex, b := range *data {
-		if b == newline {
+		if b == utils.NEWLINE {
 			endOfLine++
 			if endOfLine == 1 && prevIdx != byteIndex {
 				lineData := (*data)[prevIdx:byteIndex]

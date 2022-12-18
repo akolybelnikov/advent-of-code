@@ -119,7 +119,7 @@ func handleData(data *[]byte) (*Monkeys, error) {
 	monkeyLines := make([]*[]byte, 0)
 
 	for byteIndex, b := range *data {
-		if b == newline {
+		if b == NEWLINE {
 			line++
 			if line == 1 && prevIdx != byteIndex {
 				monkeyLine := (*data)[prevIdx:byteIndex]

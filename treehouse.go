@@ -9,7 +9,7 @@ func MakeTreesGrid(data *[]byte) (*[][]byte, error) {
 	var row []byte
 
 	for byteIndex, b := range *data {
-		if b == newline {
+		if b == NEWLINE {
 			endOfLine++
 			if endOfLine == 1 && prevIdx != byteIndex {
 				grid = append(grid, row)

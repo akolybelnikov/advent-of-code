@@ -85,7 +85,7 @@ func MakeHeightMapGrid(data *[]byte) *[]*[]byte {
 	var line, prevIdx int
 
 	for byteIndex, b := range *data {
-		if b == newline {
+		if b == NEWLINE {
 			line++
 			if line == 1 && prevIdx != byteIndex {
 				row := (*data)[prevIdx:byteIndex]
