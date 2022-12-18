@@ -105,3 +105,20 @@ func Abs(x int) int {
 	}
 	return x
 }
+
+func BytesToInt(bytes *[]byte) int {
+	var val int
+	neg := (*bytes)[0] == 45
+	if neg {
+		*bytes = (*bytes)[1:]
+	}
+	for _, b := range *bytes {
+		val = val*10 + int(b-48)
+	}
+
+	if neg {
+		val = -val
+	}
+
+	return val
+}
