@@ -1,7 +1,9 @@
-// Package advent Day 8
-package advent
+package day_8
 
-import "sort"
+import (
+	utils "github.com/akolybelnikov/advent-of-code"
+	"sort"
+)
 
 func MakeTreesGrid(data *[]byte) (*[][]byte, error) {
 	grid := make([][]byte, 0)
@@ -9,7 +11,7 @@ func MakeTreesGrid(data *[]byte) (*[][]byte, error) {
 	var row []byte
 
 	for byteIndex, b := range *data {
-		if b == NEWLINE {
+		if b == utils.NEWLINE {
 			endOfLine++
 			if endOfLine == 1 && prevIdx != byteIndex {
 				grid = append(grid, row)
