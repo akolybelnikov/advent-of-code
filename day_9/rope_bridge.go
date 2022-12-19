@@ -1,6 +1,9 @@
-package advent
+package day_9
 
-import "strconv"
+import (
+	utils "github.com/akolybelnikov/advent-of-code"
+	"strconv"
+)
 
 type direction byte
 type position struct {
@@ -60,7 +63,7 @@ func (s *state) move(d *direction) {
 func (s *state) moveTail() {
 	for i := 1; i < len(s.knots); i++ {
 		delta := &position{s.knots[i-1].x - s.knots[i].x, s.knots[i-1].y - s.knots[i].y}
-		if Abs(delta.x) <= 1 && Abs(delta.y) <= 1 {
+		if utils.Abs(delta.x) <= 1 && utils.Abs(delta.y) <= 1 {
 			return
 		}
 		if delta.y > 0 {
@@ -82,7 +85,7 @@ func VisitedPositions(data *[]byte, numKnots int) (int, error) {
 	s := initState(numKnots)
 
 	for byteIndex, b := range *data {
-		if b == NEWLINE {
+		if b == utils.NEWLINE {
 			line++
 			if line == 1 && prevIdx != byteIndex {
 				nextStep := (*data)[prevIdx:byteIndex]

@@ -1,14 +1,15 @@
-package advent_test
+package day_9_test
 
 import (
-	a "github.com/akolybelnikov/advent-of-code"
+	utils "github.com/akolybelnikov/advent-of-code"
+	"github.com/akolybelnikov/advent-of-code/day_9"
 	"testing"
 )
 
 func TestVisitedPositions(t *testing.T) {
 	t.Run("count visited positions with the opTest input", func(t *testing.T) {
-		data, _ := a.ReadDataBytes("testdata/rope_bridge/short_input.txt")
-		visited, err := a.VisitedPositions(&data, 2)
+		data, _ := utils.ReadDataBytes("testdata/rope_bridge/short_input.txt")
+		visited, err := day_9.VisitedPositions(&data, 2)
 		if err != nil {
 			t.Errorf("encountered an error: %v", err)
 		}
@@ -16,8 +17,8 @@ func TestVisitedPositions(t *testing.T) {
 	})
 
 	t.Run("count visited positions with the long input", func(t *testing.T) {
-		data, _ := a.ReadDataBytes("testdata/rope_bridge/input.txt")
-		visited, err := a.VisitedPositions(&data, 2)
+		data, _ := utils.ReadDataBytes("testdata/rope_bridge/input.txt")
+		visited, err := day_9.VisitedPositions(&data, 2)
 		if err != nil {
 			t.Errorf("encountered an error: %v", err)
 		}
@@ -27,8 +28,8 @@ func TestVisitedPositions(t *testing.T) {
 
 func TestVisitedPositionsLastKnot(t *testing.T) {
 	t.Run("count visited positions with the opTest input", func(t *testing.T) {
-		data, _ := a.ReadDataBytes("testdata/rope_bridge/short_input.txt")
-		visited, err := a.VisitedPositions(&data, 10)
+		data, _ := utils.ReadDataBytes("testdata/rope_bridge/short_input.txt")
+		visited, err := day_9.VisitedPositions(&data, 10)
 		if err != nil {
 			t.Errorf("encountered an error: %v", err)
 		}
@@ -36,8 +37,8 @@ func TestVisitedPositionsLastKnot(t *testing.T) {
 	})
 
 	t.Run("count visited positions with the larger opTest input", func(t *testing.T) {
-		data, _ := a.ReadDataBytes("testdata/rope_bridge/large_input.txt")
-		visited, err := a.VisitedPositions(&data, 10)
+		data, _ := utils.ReadDataBytes("testdata/rope_bridge/large_input.txt")
+		visited, err := day_9.VisitedPositions(&data, 10)
 		if err != nil {
 			t.Errorf("encountered an error: %v", err)
 		}
@@ -45,8 +46,8 @@ func TestVisitedPositionsLastKnot(t *testing.T) {
 	})
 
 	t.Run("count visited positions with the full opTest input", func(t *testing.T) {
-		data, _ := a.ReadDataBytes("testdata/rope_bridge/input.txt")
-		visited, err := a.VisitedPositions(&data, 10)
+		data, _ := utils.ReadDataBytes("testdata/rope_bridge/input.txt")
+		visited, err := day_9.VisitedPositions(&data, 10)
 		if err != nil {
 			t.Errorf("encountered an error: %v", err)
 		}
