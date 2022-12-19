@@ -3,6 +3,7 @@ package advent
 import (
 	"bufio"
 	"bytes"
+	"golang.org/x/exp/constraints"
 	"os"
 )
 
@@ -99,11 +100,25 @@ func HandleByteGroups(data []byte, fn groupHandlerFunction, groupSize int) (int,
 	return total, nil
 }
 
-func Abs(x int) int {
+func Abs[T constraints.Float | constraints.Integer](x T) T {
 	if x < 0 {
 		return -x
 	}
 	return x
+}
+
+func Min[T constraints.Ordered](a, b T) T {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func Max[T constraints.Ordered](a, b T) T {
+	if a > b {
+		return a
+	}
+	return b
 }
 
 func BytesToInt(bytes *[]byte) int {
