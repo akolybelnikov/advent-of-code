@@ -1,6 +1,9 @@
-package advent
+package day_13
 
-import "sort"
+import (
+	utils "github.com/akolybelnikov/advent-of-code"
+	"sort"
+)
 
 const (
 	VALUE = 0
@@ -19,7 +22,7 @@ func HandlePacketsPart1(data *[]byte) int {
 	var res int
 
 	for byteIndex, b := range *data {
-		if b == NEWLINE {
+		if b == utils.NEWLINE {
 			lineNumber++
 			if lineNumber == 1 && prevIdx != byteIndex {
 				packetLine := (*data)[prevIdx:byteIndex]
@@ -53,7 +56,7 @@ func HandlePacketsPart2(data *[]byte) int {
 	elements := make([]*element, 0)
 
 	for byteIndex, b := range *data {
-		if b == NEWLINE {
+		if b == utils.NEWLINE {
 			lineNumber++
 			if lineNumber == 1 && prevIdx != byteIndex {
 				packetLine := (*data)[prevIdx:byteIndex]

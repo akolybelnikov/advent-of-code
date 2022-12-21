@@ -1,7 +1,8 @@
-package advent
+package day_11
 
 import (
 	"fmt"
+	utils "github.com/akolybelnikov/advent-of-code"
 	"sort"
 	"strconv"
 	"strings"
@@ -119,7 +120,7 @@ func handleData(data *[]byte) (*Monkeys, error) {
 	monkeyLines := make([]*[]byte, 0)
 
 	for byteIndex, b := range *data {
-		if b == NEWLINE {
+		if b == utils.NEWLINE {
 			line++
 			if line == 1 && prevIdx != byteIndex {
 				monkeyLine := (*data)[prevIdx:byteIndex]

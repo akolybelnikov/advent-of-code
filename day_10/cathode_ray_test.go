@@ -1,14 +1,15 @@
-package advent_test
+package day_10_test
 
 import (
-	a "github.com/akolybelnikov/advent-of-code"
+	utils "github.com/akolybelnikov/advent-of-code"
+	"github.com/akolybelnikov/advent-of-code/day_10"
 	"testing"
 )
 
 func TestSignalStrength(t *testing.T) {
 	t.Run("run short input", func(t *testing.T) {
-		data, _ := a.ReadDataBytes("testdata/cathode_ray/short_test_input.txt")
-		cpu, err := a.SignalStrength(&data)
+		data, _ := utils.ReadDataBytes("testdata/short_test_input.txt")
+		cpu, err := day_10.SignalStrength(&data)
 		if err != nil {
 			t.Errorf("encountered an error: %v", err)
 		}
@@ -18,8 +19,8 @@ func TestSignalStrength(t *testing.T) {
 	})
 
 	t.Run("run opTest input", func(t *testing.T) {
-		data, _ := a.ReadDataBytes("testdata/cathode_ray/test_input.txt")
-		cpu, err := a.SignalStrength(&data)
+		data, _ := utils.ReadDataBytes("testdata/test_input.txt")
+		cpu, err := day_10.SignalStrength(&data)
 		if err != nil {
 			t.Errorf("encountered an error: %v", err)
 		}
@@ -29,8 +30,8 @@ func TestSignalStrength(t *testing.T) {
 	})
 
 	t.Run("run long input input", func(t *testing.T) {
-		data, _ := a.ReadDataBytes("testdata/cathode_ray/input.txt")
-		cpu, err := a.SignalStrength(&data)
+		data, _ := utils.ReadDataBytes("testdata/input.txt")
+		cpu, err := day_10.SignalStrength(&data)
 		if err != nil {
 			t.Errorf("encountered an error: %v", err)
 		}
