@@ -5,6 +5,7 @@ import (
 	"github.com/yourbasic/graph"
 	"golang.org/x/exp/maps"
 	"math"
+	"sort"
 )
 
 type Valve struct {
@@ -19,10 +20,12 @@ type System map[[2]byte]*Valve
 type ActiveSystem map[int]*Valve
 
 type State struct {
-	id   int
-	tick int
-	flow int
-	path map[int]bool
+	id    int
+	id2   int
+	tick  int
+	tick2 int
+	flow  int
+	path  [64]bool
 }
 
 func ParseLines(lines *[]*[]byte) *System {
@@ -73,9 +76,7 @@ func (s *System) Active() *ActiveSystem {
 			active := &Valve{IID: v.IID, id: v.id, rate: v.rate, weights: make(map[int]int)}
 			for bid, bv := range *s {
 				if bid != id && bv.rate > 0 {
-					//active.leads = append(active.leads, bid)
 					_, dist := graph.ShortestPath(g, v.IID, bv.IID)
-					//log.Printf("path from v %s to w %s is %v with weight %d", id, bid, path, dist)
 					active.weights[bv.IID] = int(dist) + 1
 				}
 			}
@@ -83,7 +84,9 @@ func (s *System) Active() *ActiveSystem {
 		}
 	}
 
-	return &sys
+	rs := sys.remap()
+
+	return rs
 }
 
 func (s *System) Graph() *graph.Mutable {
@@ -102,8 +105,7 @@ func (s *ActiveSystem) versions(state *State) []*State {
 	for id, v := range *s {
 		cost := (*s)[state.id].weights[id]
 		if v.rate > 0 && !state.path[v.IID] && state.tick+cost <= 30 {
-			np := make(map[int]bool)
-			maps.Copy(np, state.path)
+			np := state.path
 			np[v.IID] = true
 			st := &State{
 				id:   v.IID,
@@ -118,12 +120,83 @@ func (s *ActiveSystem) versions(state *State) []*State {
 	return versions
 }
 
-func FindMaxFlow(s *ActiveSystem, start int) int {
+func (s *ActiveSystem) remap() *ActiveSystem {
+	vs := maps.Keys(*s)
+	sort.Slice(vs, func(i, j int) bool {
+		return (*s)[vs[i]].id[0] < (*s)[vs[j]].id[0] && (*s)[vs[i]].id[1] < (*s)[vs[j]].id[1]
+	})
+	np := make(map[int]int)
+	ns := make(ActiveSystem)
+
+	for idx, k := range vs {
+		np[k] = idx
+		(*s)[k].IID = idx
+	}
+
+	for k, v := range *s {
+		newWeights := make(map[int]int)
+		for k2, v2 := range v.weights {
+			newWeights[np[k2]] = v2
+		}
+		v.weights = newWeights
+		ns[np[k]] = v
+	}
+
+	return &ns
+}
+
+func (s *ActiveSystem) versions2(state *State, space *map[State]int) []*State {
+	versions := make([]*State, 0)
+	for id1 := 1; id1 < len(*s); id1++ {
+		offset := 0
+		if state.id == 0 && state.id2 == 0 {
+			offset = id1
+		}
+		for id2 := 1 + offset; id2 < len(*s); id2++ {
+			if id1 != id2 {
+				v1 := (*s)[id1]
+				v2 := (*s)[id2]
+				cost1 := (*s)[state.id].weights[id1]
+				cost2 := (*s)[state.id2].weights[id2]
+				visited := state.path[v1.IID] || state.path[v2.IID]
+				if !visited && state.tick+cost1 <= 26 && state.tick2+cost2 <= 26 {
+					flow1 := (26 - (state.tick + cost1)) * v1.rate
+					flow2 := (26 - (state.tick2 + cost2)) * v2.rate
+					np := state.path
+					np[v1.IID] = true
+					np[v2.IID] = true
+					flow := state.flow + flow1 + flow2
+					sp := State{
+						id:   v1.IID,
+						id2:  v2.IID,
+						path: np,
+					}
+					if prevFlow, ok := (*space)[sp]; !ok || prevFlow < flow {
+						(*space)[sp] = flow
+						newState := &State{
+							id:    v1.IID,
+							id2:   v2.IID,
+							tick:  state.tick + cost1,
+							tick2: state.tick2 + cost2,
+							flow:  flow,
+							path:  np,
+						}
+						versions = append(versions, newState)
+					}
+				}
+			}
+		}
+	}
+
+	return versions
+}
+
+func FindMaxFlow(s *ActiveSystem) int {
 	state := &State{
-		id:   start,
+		id:   0,
 		tick: 0,
 		flow: 0,
-		path: make(map[int]bool),
+		path: [64]bool{},
 	}
 
 	queue := []*State{state}
@@ -133,6 +206,32 @@ func FindMaxFlow(s *ActiveSystem, start int) int {
 		queue = queue[1:]
 		maxFlow = utils.Max(maxFlow, cur.flow)
 		vs := s.versions(cur)
+		for _, v := range vs {
+			queue = append(queue, v)
+		}
+	}
+
+	return maxFlow
+}
+
+func FindMaxFlow2(s *ActiveSystem) int {
+	space := make(map[State]int)
+	state := &State{
+		id:    0,
+		id2:   0,
+		tick:  0,
+		tick2: 0,
+		flow:  0,
+		path:  [64]bool{},
+	}
+
+	queue := []*State{state}
+	maxFlow := math.MinInt
+	for len(queue) > 0 {
+		cur := queue[0]
+		queue = queue[1:]
+		maxFlow = utils.Max(maxFlow, cur.flow)
+		vs := s.versions2(cur, &space)
 		for _, v := range vs {
 			queue = append(queue, v)
 		}
