@@ -1,14 +1,15 @@
-package advent_test
+package day_11_test
 
 import (
 	a "github.com/akolybelnikov/advent-of-code"
+	"github.com/akolybelnikov/advent-of-code/day_11"
 	"testing"
 )
 
 func TestMonkeyBusiness(t *testing.T) {
 	t.Run("process short test input", func(t *testing.T) {
-		data, _ := a.ReadDataBytes("testdata/monkey/short_input.txt")
-		monkeys, f, err := a.MonkeyBusiness(&data)
+		data, _ := a.ReadDataBytes("testdata/short_input.txt")
+		monkeys, f, err := day_11.MonkeyBusiness(&data)
 		if err != nil {
 			t.Errorf("encountered an error while creating monkeys: %v", err)
 		}
@@ -26,8 +27,8 @@ func TestMonkeyBusiness(t *testing.T) {
 	})
 
 	t.Run("process default test input", func(t *testing.T) {
-		data, _ := a.ReadDataBytes("testdata/monkey/input.txt")
-		monkeys, factor, err := a.MonkeyBusiness(&data)
+		data, _ := a.ReadDataBytes("testdata/input.txt")
+		monkeys, factor, err := day_11.MonkeyBusiness(&data)
 		t.Logf("factor is %d\n", factor)
 		if err != nil {
 			t.Errorf("encountered an error while creating monkeys: %v", err)

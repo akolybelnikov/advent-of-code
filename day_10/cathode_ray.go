@@ -1,6 +1,7 @@
-package advent
+package day_10
 
 import (
+	utils "github.com/akolybelnikov/advent-of-code"
 	"log"
 	"strconv"
 )
@@ -46,7 +47,7 @@ func SignalStrength(data *[]byte) (*CPU, error) {
 	c := initCPU()
 
 	for byteIndex, b := range *data {
-		if b == NEWLINE {
+		if b == utils.NEWLINE {
 			line++
 			if line == 1 && prevIdx != byteIndex {
 				nextInstruction := (*data)[prevIdx:byteIndex]
