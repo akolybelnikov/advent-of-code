@@ -1,7 +1,8 @@
-package advent_test
+package day_12_test
 
 import (
-	a "github.com/akolybelnikov/advent-of-code"
+	utils "github.com/akolybelnikov/advent-of-code"
+	"github.com/akolybelnikov/advent-of-code/day_12"
 	dijkstrapath "github.com/kirves/godijkstra/common/path"
 	"github.com/kirves/godijkstra/dijkstra"
 	"github.com/stretchr/testify/assert"
@@ -9,12 +10,12 @@ import (
 )
 
 func TestShortInput(t *testing.T) {
-	bytes, err := a.ReadDataBytes("testdata/hill_climbing/short_input.txt")
+	bytes, err := utils.ReadDataBytes("testdata/short_input.txt")
 	assert.NoError(t, err)
-	grid := a.MakeHeightMapGrid(&bytes)
+	grid := day_12.MakeHeightMapGrid(&bytes)
 	assert.Equal(t, 5, len(*grid))
 	assert.Equal(t, 8, len(*(*grid)[0]))
-	graph, s, e, sp := a.CreateGraph(grid)
+	graph, s, e, sp := day_12.CreateGraph(grid)
 	assert.Equal(t, 40, len(graph.Nodes))
 	assert.Equal(t, "0:0", s)
 	assert.Equal(t, "2:5", e)
@@ -44,12 +45,12 @@ func TestShortInput(t *testing.T) {
 }
 
 func TestLongInput(t *testing.T) {
-	bytes, err := a.ReadDataBytes("testdata/hill_climbing/input.txt")
+	bytes, err := utils.ReadDataBytes("testdata/input.txt")
 	assert.NoError(t, err)
-	grid := a.MakeHeightMapGrid(&bytes)
+	grid := day_12.MakeHeightMapGrid(&bytes)
 	assert.Equal(t, 41, len(*grid))
 	assert.Equal(t, 67, len(*(*grid)[0]))
-	graph, s, e, sp := a.CreateGraph(grid)
+	graph, s, e, sp := day_12.CreateGraph(grid)
 	assert.Equal(t, 2747, len(graph.Nodes))
 	assert.Equal(t, "20:0", s)
 	assert.Equal(t, "20:43", e)

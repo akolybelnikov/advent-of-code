@@ -6,7 +6,6 @@ import (
 )
 
 type cpuInstruction byte
-type execFn func(*[]byte) error
 
 type CPU struct {
 	RegisterValue int
