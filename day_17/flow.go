@@ -1,18 +1,17 @@
 package day_17
 
+import "reflect"
+
 const (
 	LEFT byte = 60
 )
 
-type group map[int]int
-
 type state struct {
-	shape  map[int]struct{}
-	buffer group
-	cache  map[int]struct{}
-	left   int
-	right  int
-	top    int
+	shape map[int]struct{}
+	cache map[int]struct{}
+	left  int
+	right int
+	top   int
 }
 
 func Run(pushes *[]byte, rocks int) int {
@@ -34,11 +33,68 @@ func Run(pushes *[]byte, rocks int) int {
 	return s.top
 }
 
+func Run2(pushes *[]byte, rocks int) int {
+	prefix, cycle, sumStart, sumCycle, _, cycleValues := findCycle(pushes)
+	quotient := (rocks - prefix) / cycle
+	remainder := (rocks - prefix) % cycle
+	maxY := sumStart + quotient*sumCycle
+	for i := 0; i < remainder; i++ {
+		maxY += cycleValues[i]
+	}
+
+	return maxY
+}
+
+func findCycle(input *[]byte) (int, int, int, int, []int, []int) {
+	values := make([]int, 0)
+	curTop := 0
+	var next bool
+	s := initState()
+	shapeIdx := shape()
+	jet := push(input)
+	for i := 0; i < 3*len(*input); i++ {
+		next = s.spawn(shapeIdx())
+		for next {
+			s.shift(jet())
+			next = s.sink()
+		}
+		prevTop := curTop
+		curTop = s.top
+		values = append(values, curTop-prevTop)
+	}
+	i, j := findRecurringElement(prefixes(values, len(*input)))
+	sumStart := 0
+	sumCycle := 0
+	for k := 0; k < i; k++ {
+		sumStart += values[k]
+	}
+	for k := i; k < j; k++ {
+		sumCycle += values[k]
+	}
+	return i, j - i, sumStart, sumCycle, values[:i], values[i:j]
+}
+
+func findRecurringElement(l [][]int) (int, int) {
+	for i := 0; i < len(l); i++ {
+		for j := i + 1; j < len(l); j++ {
+			if reflect.DeepEqual(l[i], l[j]) {
+				return i, j
+			}
+		}
+	}
+	return -1, -1
+}
+
+func prefixes(l []int, n int) [][]int {
+	var res [][]int
+	for i := 0; i < len(l)-n; i++ {
+		res = append(res, l[i:i+n])
+	}
+	return res
+}
+
 func initState() *state {
 	return &state{
-		buffer: map[int]int{
-			0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0,
-		},
 		cache: make(map[int]struct{}),
 	}
 }
@@ -155,16 +211,6 @@ func (s *state) collide(lookahead *map[int]struct{}) bool {
 			return true
 		}
 	}
-	return false
-}
-
-func (g *group) overlap(other *group) bool {
-	for k, v := range *g {
-		if (*other)[k] == v {
-			return true
-		}
-	}
-
 	return false
 }
 
