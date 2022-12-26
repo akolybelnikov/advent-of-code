@@ -12,7 +12,7 @@ import (
 func TestValves(t *testing.T) {
 	t.Run("with test input", func(t *testing.T) {
 		start := time.Now()
-		data, _ := utils.ReadDataBytes("testdata/test_input.txt")
+		data, _ := utils.ReadDataBytes("testdata/input_test.txt")
 		arr, _ := utils.MakeBytesArray(&data)
 		vs := day_16.ParseLines(arr)
 		assert.Equal(t, 10, len(*vs))
@@ -35,7 +35,7 @@ func TestValves(t *testing.T) {
 func TestValves2(t *testing.T) {
 	t.Run("with test input", func(t *testing.T) {
 		start := time.Now()
-		data, _ := utils.ReadDataBytes("testdata/test_input.txt")
+		data, _ := utils.ReadDataBytes("testdata/input_test.txt")
 		arr, _ := utils.MakeBytesArray(&data)
 		vs := day_16.ParseLines(arr)
 		assert.Equal(t, 10, len(*vs))

@@ -10,7 +10,7 @@ import (
 )
 
 func TestInputBeacons(t *testing.T) {
-	data, _ := utils.ReadDataBytes("testdata/test_input.txt")
+	data, _ := utils.ReadDataBytes("testdata/input_test.txt")
 	arr, _ := utils.MakeBytesArray(&data)
 	pairs := day_15.ProcessData(arr)
 
@@ -96,7 +96,7 @@ func TestPair_CoverageForRowWithLimit(t *testing.T) {
 }
 
 func TestFindCoverageWithLimit_Test(t *testing.T) {
-	data, _ := utils.ReadDataBytes("testdata/test_input.txt")
+	data, _ := utils.ReadDataBytes("testdata/input_test.txt")
 	arr, _ := utils.MakeBytesArray(&data)
 	pairs := day_15.ProcessData(arr)
 	fq := day_15.FindCoverageWithLimit(pairs, 20)
