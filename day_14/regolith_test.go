@@ -10,7 +10,7 @@ import (
 )
 
 func TestMakeGridTestInput(t *testing.T) {
-	data, _ := a.ReadDataBytes("testdata/test_input.txt")
+	data, _ := a.ReadDataBytes("testdata/input_test.txt")
 	bytesArray, _ := a.MakeBytesArray(&data)
 	grid, leftEdge, rightEdge := c.MakeGrid(bytesArray)
 	count := grid.DropSand(leftEdge, rightEdge)
@@ -28,7 +28,7 @@ func TestMakeGrid(t *testing.T) {
 }
 
 func TestMakeGridPart2TestInput(t *testing.T) {
-	data, _ := a.ReadDataBytes("testdata/test_input.txt")
+	data, _ := a.ReadDataBytes("testdata/input_test.txt")
 	bytesArray, _ := a.MakeBytesArray(&data)
 	grid, _, _ := c.MakeGrid(bytesArray)
 	count := grid.DropSandPart2()

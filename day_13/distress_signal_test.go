@@ -8,7 +8,7 @@ import (
 )
 
 func TestCompareTestPackets(t *testing.T) {
-	data, _ := utils.ReadDataBytes("testdata/test_input.txt")
+	data, _ := utils.ReadDataBytes("testdata/input_test.txt")
 	result := day_13.HandlePacketsPart1(&data)
 
 	assert.Equal(t, 13, result)
@@ -22,7 +22,7 @@ func TestComparePackets(t *testing.T) {
 }
 
 func TestCompareTestPackets2(t *testing.T) {
-	data, _ := utils.ReadDataBytes("testdata/test_input.txt")
+	data, _ := utils.ReadDataBytes("testdata/input_test.txt")
 	result := day_13.HandlePacketsPart2(&data)
 
 	assert.Equal(t, 140, result)

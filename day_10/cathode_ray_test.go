@@ -19,7 +19,7 @@ func TestSignalStrength(t *testing.T) {
 	})
 
 	t.Run("run opTest input", func(t *testing.T) {
-		data, _ := utils.ReadDataBytes("testdata/test_input.txt")
+		data, _ := utils.ReadDataBytes("testdata/input_test.txt")
 		cpu, err := day_10.SignalStrength(&data)
 		if err != nil {
 			t.Errorf("encountered an error: %v", err)
