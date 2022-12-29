@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"golang.org/x/exp/constraints"
+	"math"
 	"os"
 )
 
@@ -136,4 +137,11 @@ func BytesToInt(bytes *[]byte) int {
 	}
 
 	return val
+}
+
+func Ceil[T constraints.Float | constraints.Integer](a, b T) T {
+	af := float64(a)
+	bf := float64(b)
+
+	return T(math.Ceil(af / bf))
 }
