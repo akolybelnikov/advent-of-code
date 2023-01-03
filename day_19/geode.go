@@ -104,6 +104,7 @@ func walk(bp *blueprint, s *state, cache *stateCache) int {
 	//build a geode botRecipe, or do nothing.
 	maxVal := s.amounts[3] + s.robots[3]*s.cycle
 
+OUTER:
 	for botType, botRecipe := range bp.robots {
 		// if bot is geode bot, or we already have reached max needed botRecipe amount, skip.
 		if botType != 3 && s.robots[botType] >= bp.maxSpend[botType] {
@@ -111,51 +112,46 @@ func walk(bp *blueprint, s *state, cache *stateCache) int {
 		}
 		// try to calculate waiting time until we can build a bot.
 		wait := 0
-		next := true
 		for _, bot := range *botRecipe {
-			// if we don't have any robots of particular type yet, no need to wait.
+			// if we don't have any robots of particular type yet, no need to wait. skip to the next iteration.
 			if s.robots[bot[1]] == 0 {
-				next = false
-				break
+				continue OUTER
 			}
 			// waiting time is current amount of amt minus the cost of building divided by the number of
 			// available bots. should we get a negative waiting time, we take 0 as the maximum.
 			wait = utils.Max(wait, utils.Ceil(bot[0]-s.amounts[bot[1]], s.robots[bot[1]]))
 		}
-
-		if next {
-			// remaining cycles
-			timeLeft := s.cycle - wait - 1
-			if timeLeft <= 0 {
-				continue
-			}
-			// lookahead values
-			_bots := s.robots
-			_amounts := [4]int{}
-			for i, amt := range s.amounts {
-				_amounts[i] = amt + s.robots[i]*(wait+1)
-			}
-			for _, _bot := range *botRecipe {
-				_amounts[_bot[1]] -= _bot[0]
-			}
-			_bots[botType] += 1
-
-			// Optimization 2 throws away the excess amounts
-			// the amount of resources we need to hold on to, is the amount we consume pro round
-			// the amount we consume is the maximum spend-rate over time left
-			for i := 0; i < 3; i++ {
-				_amounts[i] = utils.Min(_amounts[i], bp.maxSpend[i]*timeLeft)
-			}
-			// branch state
-			newState := &state{
-				robots:  _bots,
-				amounts: _amounts,
-				cycle:   timeLeft,
-			}
-
-			v := walk(bp, newState, cache)
-			maxVal = utils.Max(maxVal, v)
+		// remaining cycles
+		timeLeft := s.cycle - wait - 1
+		if timeLeft <= 0 {
+			continue
 		}
+		// next state values
+		_bots := s.robots
+		_amounts := [4]int{}
+		for i, amt := range s.amounts {
+			_amounts[i] = amt + s.robots[i]*(wait+1)
+		}
+		for _, _bot := range *botRecipe {
+			_amounts[_bot[1]] -= _bot[0]
+		}
+		_bots[botType] += 1
+
+		// Optimization 2 throws away the excess amounts
+		// the amount of resources we need to hold on to, is the amount we consume pro round
+		// the amount we consume is the maximum spend-rate over time left
+		for i := 0; i < 3; i++ {
+			_amounts[i] = utils.Min(_amounts[i], bp.maxSpend[i]*timeLeft)
+		}
+		// branch state
+		newState := &state{
+			robots:  _bots,
+			amounts: _amounts,
+			cycle:   timeLeft,
+		}
+
+		v := walk(bp, newState, cache)
+		maxVal = utils.Max(maxVal, v)
 
 	}
 
