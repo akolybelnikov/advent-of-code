@@ -3,14 +3,13 @@ package day_21
 type name [4]byte
 
 type monkey struct {
+	deps        []*chan int
+	left, right chan int
+	leftVal     []int
 	name        name
 	op          byte
-	left, right chan int
-	val         int
-	deps        []*chan int
-	leftVal     []int
 	rightVal    []int
-	waiting     bool
+	val         int
 }
 
 type graph map[name]*monkey
@@ -28,14 +27,32 @@ func MonkeyMath(data *[]*[]byte) int {
 	r := name{'r', 'o', 'o', 't'}
 	root := g[r]
 
-	for {
-		g.run()
-		if root.val != 0 {
-			break
+	for _, m := range g {
+		if m.op == 0 {
+			go m.yell()
 		}
 	}
 
-	return root.val
+	res := <-root.signal()
+
+	return res
+}
+
+func (m *monkey) signal() <-chan int {
+	c := make(chan int, 1)
+
+	go func() {
+		defer close(c)
+		for {
+			if m.val != 0 {
+				c <- m.val
+				break
+			}
+		}
+
+	}()
+
+	return c
 }
 
 func (m *monkey) yell() {
@@ -66,18 +83,6 @@ func (m *monkey) wait() {
 			}
 			go m.yell()
 			break
-		}
-	}
-}
-
-func (g *graph) run() {
-	for _, m := range *g {
-		if m.op == 0 && len(m.deps) > 0 {
-			go m.yell()
-		}
-		if len(m.leftVal) == 0 && len(m.rightVal) == 0 && !m.waiting {
-			m.waiting = true
-			go m.wait()
 		}
 	}
 }

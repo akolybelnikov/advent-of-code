@@ -29,7 +29,7 @@ func parseMonkeyData(data *[]*[]byte, g *graph) {
 			mk.right = make(chan int, 1)
 			mk.leftVal = make([]int, 0)
 			mk.rightVal = make([]int, 0)
-			mk.waiting = false
+
 			ln := name{(*line)[6], (*line)[7], (*line)[8], (*line)[9]}
 			if mkl, ok := (*g)[ln]; !ok {
 				lm = &monkey{
@@ -55,6 +55,8 @@ func parseMonkeyData(data *[]*[]byte, g *graph) {
 				rm = mkr
 				rm.deps = append(rm.deps, &mk.right)
 			}
+
+			go mk.wait()
 		}
 	}
 }
