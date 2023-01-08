@@ -33,3 +33,20 @@ func TestPart1(t *testing.T) {
 		assert.Equal(t, root, 232974643455000)
 	})
 }
+func TestPart2(t *testing.T) {
+	t.Run("test", func(t *testing.T) {
+		start := time.Now()
+		dataArr, _ := utils.MakeBytesArray(&testInput)
+		humn := day_21.MonkeyMath2(dataArr)
+		fmt.Println(time.Since(start))
+		assert.Equal(t, humn, 301)
+	})
+
+	t.Run("input", func(t *testing.T) {
+		start := time.Now()
+		dataArr, _ := utils.MakeBytesArray(&input)
+		humn := day_21.MonkeyMath2(dataArr)
+		fmt.Println(time.Since(start))
+		assert.Equal(t, humn, 3740214169961)
+	})
+}

@@ -3,13 +3,13 @@ package day_21
 type name [4]byte
 
 type monkey struct {
-	deps        []*chan int
-	left, right chan int
-	leftVal     []int
-	name        name
-	op          byte
-	rightVal    []int
-	val         int
+	leftDeps, rightDeps       []*monkey
+	left, right               chan int
+	leftVal, rightVal         []int
+	name, leftName, rightName name
+	op                        byte
+	val                       int
+	depOnHuman                bool
 }
 
 type graph map[name]*monkey
@@ -19,6 +19,7 @@ const (
 	ADD = 43
 	SUB = 45
 	DIV = 47
+	EQL = 61
 )
 
 func MonkeyMath(data *[]*[]byte) int {
@@ -38,6 +39,81 @@ func MonkeyMath(data *[]*[]byte) int {
 	return res
 }
 
+func MonkeyMath2(data *[]*[]byte) int {
+	g := make(graph)
+	parseMonkeyData(data, &g)
+	r := name{'r', 'o', 'o', 't'}
+	root := g[r]
+
+	h := name{'h', 'u', 'm', 'n'}
+	human := g[h]
+
+	for _, m := range g {
+		if m.op == 0 {
+			go m.yell()
+		}
+	}
+
+	<-root.signal()
+	root.op = EQL
+
+	left := g[root.leftName]
+	right := g[root.rightName]
+
+	if left.depOnHuman {
+		root.val = right.val
+	} else {
+		root.val = left.val
+	}
+
+	for m := root; m.name != h; {
+		leftM := g[m.leftName]
+		rightM := g[m.rightName]
+
+		if leftM.depOnHuman {
+			leftM.val, _ = reverseOp(m.op, nil, &rightM.val, m.val)
+			m = leftM
+		} else {
+			_, rightM.val = reverseOp(m.op, &leftM.val, nil, m.val)
+			m = rightM
+		}
+	}
+
+	return human.val
+}
+
+func reverseOp(op byte, left, right *int, target int) (int, int) {
+	switch op {
+	case ADD:
+		if left == nil {
+			return target - *right, *right
+		}
+		return *left, target - *left
+	case SUB:
+		if left == nil {
+			return *right + target, *right
+		}
+		return *left, *left - target
+	case MUL:
+		if left == nil {
+			return target / *right, *right
+		}
+		return *left, target / *left
+	case DIV:
+		if left == nil {
+			return *right * target, *right
+		}
+		return *left, *left / target
+	case EQL:
+		if left == nil {
+			return *right, *right
+		}
+		return *left, *left
+	default:
+		panic("unknown op")
+	}
+}
+
 func (m *monkey) signal() <-chan int {
 	c := make(chan int, 1)
 
@@ -49,17 +125,25 @@ func (m *monkey) signal() <-chan int {
 				break
 			}
 		}
-
 	}()
 
 	return c
 }
 
 func (m *monkey) yell() {
-	for _, dep := range m.deps {
-		*dep <- m.val
+	for _, lm := range m.leftDeps {
+		if m.depOnHuman {
+			lm.depOnHuman = m.depOnHuman
+		}
+		lm.left <- m.val
 	}
-	m.deps = nil
+
+	for _, rm := range m.rightDeps {
+		if m.depOnHuman {
+			rm.depOnHuman = m.depOnHuman
+		}
+		rm.right <- m.val
+	}
 }
 
 func (m *monkey) wait() {
