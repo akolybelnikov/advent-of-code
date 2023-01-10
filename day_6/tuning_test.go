@@ -48,3 +48,13 @@ func TestFindFirstMarker(t *testing.T) {
 		t.Logf("first message: %d", idx)
 	})
 }
+
+func BenchmarkFindFirstMessage(b *testing.B) {
+	data, err := a.ReadDataBytes("testdata/input.txt")
+	if err != nil {
+		b.Logf("error reading bytes: %v", err)
+	}
+	for i := 0; i < b.N; i++ {
+		c.FindFirstMessage(&data)
+	}
+}

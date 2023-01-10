@@ -50,3 +50,10 @@ func TestPart2(t *testing.T) {
 		assert.Equal(t, humn, 3740214169961)
 	})
 }
+
+func BenchmarkMonkeyMath(b *testing.B) {
+	dataArr, _ := utils.MakeBytesArray(&input)
+	for i := 0; i < b.N; i++ {
+		_ = day_21.MonkeyMath(dataArr)
+	}
+}
