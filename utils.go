@@ -145,3 +145,10 @@ func Ceil[T constraints.Float | constraints.Integer](a, b T) T {
 
 	return T(math.Ceil(af / bf))
 }
+
+func Gcd(a, b int) int {
+	if b == 0 {
+		return a
+	}
+	return Gcd(b, a%b)
+}
