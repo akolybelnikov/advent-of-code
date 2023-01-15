@@ -1,7 +1,5 @@
 package day_22
 
-import "fmt"
-
 const (
 	RIGHT = iota
 	DOWN
@@ -111,10 +109,6 @@ func (b *board) move(p *pos, instr int, w wrap) {
 			nextPos, nextFace = b.lookAhead3D(p)
 		}
 
-		if nextPos.y == -1 || nextPos.x == -1 {
-			fmt.Println(nextPos)
-		}
-
 		if b.tiles[nextPos.y][nextPos.x] == TILE {
 			p.y = nextPos.y
 			p.x = nextPos.x
@@ -155,19 +149,9 @@ func (b *board) lookAhead3D(p *pos) (*pos, int) {
 func (b *board) swap(p *pos) (*pos, int) {
 	adj := b.faces[b.cur].adjacent[p.facing]
 	f := b.faces[adj[0]]
+	sp := f.makeSwap(p, adj[1])
 
-	if adj[1] == p.facing {
-		if p.y < 0 {
-			p.y = f.size - 1
-		}
-		if p.y >= len(b.tiles)-1 {
-			p.y = 0
-		}
-		return p, f.ID
-	} else {
-		sp := f.makeSwap(p, adj[1])
-		return sp, f.ID
-	}
+	return sp, f.ID
 }
 
 func (p *pos) update() {
@@ -198,18 +182,18 @@ func (f *face) makeSwap(p *pos, newDir int) *pos {
 	switch {
 	case p.facing == UP && newDir == DOWN:
 		np.y = f.vertex.y
-		np.x = f.vertex.x + (f.size - (np.x % f.size))
+		np.x = f.vertex.x + f.size - np.x%f.size - 1
 		np.facing = DOWN
 	case p.facing == DOWN && newDir == UP:
 		np.y = f.vertex.y + f.size - 1
-		np.x = f.vertex.x + (f.size - (np.x % f.size))
+		np.x = f.vertex.x + f.size - np.x%f.size - 1
 		np.facing = UP
 	case p.facing == LEFT && newDir == RIGHT:
-		np.y = f.vertex.y + (f.size - np.y%f.size)
+		np.y = f.vertex.y + f.size - np.y%f.size - 1
 		np.x = f.vertex.x
 		np.facing = RIGHT
 	case p.facing == RIGHT && newDir == LEFT:
-		np.y = f.vertex.y + (f.size - (np.y % f.size))
+		np.y = f.vertex.y + f.size - np.y%f.size - 1
 		np.x = f.vertex.x + f.size - 1
 		np.facing = LEFT
 	case p.facing == LEFT && newDir == DOWN:
@@ -218,22 +202,22 @@ func (f *face) makeSwap(p *pos, newDir int) *pos {
 		np.facing = DOWN
 	case p.facing == DOWN && newDir == LEFT:
 		np.y = f.vertex.y + p.x%f.size
-		np.x = f.vertex.x
+		np.x = f.vertex.x + f.size - 1
 		np.facing = LEFT
 	case p.facing == LEFT && newDir == UP:
 		np.y = f.vertex.y
 		np.x = f.vertex.x + p.y%f.size
 		np.facing = UP
 	case p.facing == UP && newDir == LEFT:
-		np.y = f.vertex.y + (f.size - (p.x % f.size))
+		np.y = f.vertex.y + f.size - p.x%f.size - 1
 		np.x = f.vertex.x + f.size - 1
 		np.facing = LEFT
 	case p.facing == RIGHT && newDir == DOWN:
 		np.y = f.vertex.y
-		np.x = f.vertex.x + (f.size - (p.y % f.size))
+		np.x = f.vertex.x + f.size - p.y%f.size - 1
 		np.facing = DOWN
 	case p.facing == DOWN && newDir == RIGHT:
-		np.y = f.vertex.y + (f.size - (p.x % f.size))
+		np.y = f.vertex.y + f.size - p.x%f.size - 1
 		np.x = f.vertex.x
 		np.facing = RIGHT
 	case p.facing == RIGHT && newDir == UP:
@@ -242,6 +226,22 @@ func (f *face) makeSwap(p *pos, newDir int) *pos {
 		np.facing = UP
 	case p.facing == UP && newDir == RIGHT:
 		np.y = f.vertex.y + p.x%f.size
+		np.x = f.vertex.x
+		np.facing = RIGHT
+	case p.facing == UP && newDir == UP:
+		np.y = f.vertex.y + f.size - 1
+		np.x = f.vertex.x + p.x%f.size
+		np.facing = UP
+	case p.facing == DOWN && newDir == DOWN:
+		np.y = f.vertex.y
+		np.x = f.vertex.x + p.x%f.size
+		np.facing = DOWN
+	case p.facing == LEFT && newDir == LEFT:
+		np.y = f.vertex.y + p.y%f.size
+		np.x = f.vertex.x + f.size - 1
+		np.facing = LEFT
+	case p.facing == RIGHT && newDir == RIGHT:
+		np.y = f.vertex.y + p.y%f.size
 		np.x = f.vertex.x
 		np.facing = RIGHT
 	}

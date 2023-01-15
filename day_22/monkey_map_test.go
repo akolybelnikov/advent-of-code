@@ -16,7 +16,6 @@ var testInput []byte
 var input []byte
 
 func TestMonkeyMap(t *testing.T) {
-
 	t.Run("test input", func(t *testing.T) {
 		start := time.Now()
 		arr, _ := utils.MakeBytesArray(&testInput)
@@ -35,7 +34,6 @@ func TestMonkeyMap(t *testing.T) {
 }
 
 func TestMonkeyMap2(t *testing.T) {
-
 	t.Run("test input", func(t *testing.T) {
 		start := time.Now()
 		arr, _ := utils.MakeBytesArray(&testInput)
@@ -50,5 +48,21 @@ func TestMonkeyMap2(t *testing.T) {
 		pswd := day_22.MonkeyMap2(arr)
 		t.Logf("password = %d, took %s", pswd, time.Since(start))
 		assert.Equal(t, 74288, pswd)
+	})
+}
+
+func BenchmarkMonkeyMap(b *testing.B) {
+	b.Run("PartOne", func(b *testing.B) {
+		arr, _ := utils.MakeBytesArray(&input)
+		for i := 0; i < b.N; i++ {
+			day_22.MonkeyMap(arr)
+		}
+	})
+
+	b.Run("PartTwo", func(b *testing.B) {
+		arr, _ := utils.MakeBytesArray(&input)
+		for i := 0; i < b.N; i++ {
+			day_22.MonkeyMap2(arr)
+		}
 	})
 }
