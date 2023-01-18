@@ -8,7 +8,7 @@ import (
 // For each line:
 // Parse input line and calculate the manhattan distance from the sensor to the beacon
 // Find all # positions by applying the manhattan length (CoverageForRow area) and search row index
-// Store X coordinates of all # positions for all pairs in a map
+// Store x coordinates of all # positions for all pairs in a map
 const (
 	colon = 58
 )
