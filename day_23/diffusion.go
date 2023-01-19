@@ -3,11 +3,10 @@ package day_23
 import (
 	"github.com/mitchellh/hashstructure/v2"
 	"github.com/puzpuzpuz/xsync"
-	"log"
 )
 
 const (
-	EMPTY state = iota
+	EMPTY State = iota
 	ELF
 )
 
@@ -22,167 +21,129 @@ const (
 	SW
 )
 
-type state uint8
+type State uint8
 
-type cell struct {
-	state    state
-	dir      int
-	proposed int
+type Cell struct {
+	State    State
+	Proposed xsync.Counter
 }
 
-type point struct {
-	x int32
-	y int32
+type Point struct {
+	X int32
+	Y int32
 }
 
-type grid struct {
-	cells xsync.MapOf[point, *cell]
-	edges [2]point
+type Grid struct {
+	Cells xsync.MapOf[Point, *Cell]
 	cur   int
 	rules map[int][]int
 }
 
 func UnstableDiffusion(arr *[]*[]byte) int {
-	g := newGrid()
-	g.makeCells(arr)
-
-	log.Printf("Initial grid size: %d x %d", g.getSizeX(), g.getSizeY())
-	ps := g.getMinRectangular()
-	log.Printf("Minimal containing rectangular: %v %v", ps[0], ps[1])
-	log.Printf("Empty cells count: %d", g.getEmptyCellCount())
-
-	p := point{x: 4, y: 1}
-	if c, ok := g.cells.Load(p); ok {
-		log.Printf("Cell %v: %v", p, c)
-	}
-
-	ns := p.getNeighborCells()
-	log.Printf("Neighbors of %v: %v", p, ns)
-
-	hn := g.hasNeighborElves(&ns)
-	log.Printf("Has neighbors: %08b = %d", hn, hn)
-	log.Printf("Has neighbors: %v", hn > 0)
-
-	for i := 0; i < 8; i++ {
-		log.Printf("neighbor %d: %v", i, hn&byte(1<<i) > 0)
-	}
+	g := NewGrid(arr)
 
 	for i := 0; i < 10; i++ {
-		g.cur = i % 4
-		g.cells.Range(func(p point, c *cell) bool {
-			if c.state == ELF {
-				cm := g.propose(&p)
-				log.Printf("Can move %v | %v | %d ", p, cm, c.dir)
-			}
-			return true
-		})
-		log.Printf("Current direction: %d", g.cur)
+		elvesCanMove := g.Propose(i)
+
+		if len(elvesCanMove) == 0 {
+			break
+		}
+
+		g.Move(elvesCanMove)
 	}
 
-	return 0
+	return g.getEmptyCellCount()
 }
 
-func newCell() *cell {
-	return &cell{
-		state:    EMPTY,
-		proposed: 0,
+func UnstableDiffusion2(arr *[]*[]byte) int {
+	g := NewGrid(arr)
+	var rounds int
+
+	for {
+		elvesCanMove := g.Propose(rounds)
+		rounds++
+
+		if len(elvesCanMove) == 0 {
+			break
+		}
+
+		g.Move(elvesCanMove)
 	}
+
+	return rounds
 }
 
-func newGrid() *grid {
-	g := &grid{
-		edges: [2]point{
-			{x: 0, y: 0},
-			{x: 0, y: 0},
+func NewCell() *Cell {
+	return &Cell{}
+}
+
+func NewGrid(arr *[]*[]byte) *Grid {
+	g := &Grid{
+		Cells: *xsync.NewTypedMapOf[Point, *Cell](getHash),
+		rules: map[int][]int{
+			N: {N, NW, NE},
+			S: {S, SW, SE},
+			W: {W, NW, SW},
+			E: {E, NE, SE},
 		},
 	}
 
-	g.cells = *xsync.NewTypedMapOf[point, *cell](getHash)
-
-	g.rules = make(map[int][]int)
-	g.rules[N] = []int{NW, N, NE}
-	g.rules[S] = []int{SW, S, SE}
-	g.rules[W] = []int{NW, W, SW}
-	g.rules[E] = []int{NE, E, SE}
+	g.makeCells(arr)
 
 	return g
 }
 
-func getHash(p point) uint64 {
+func getHash(p Point) uint64 {
 	hash, _ := hashstructure.Hash(p, hashstructure.FormatV2, nil)
 	return hash
 }
 
-func (g *grid) makeCells(arr *[]*[]byte) {
+func (g *Grid) makeCells(arr *[]*[]byte) {
 	for i, v := range *arr {
 		for i2, b := range *v {
-			p := point{x: int32(i2), y: int32(i)}
-			c := &cell{}
+			p := Point{X: int32(i2), Y: int32(i)}
+			c := NewCell()
 			if b == '#' {
-				c.state = ELF
+				c.State = ELF
 			}
-			g.cells.Store(p, c)
-			g.updateEdges(p)
+			g.Cells.Store(p, c)
 		}
 	}
 }
 
-func (g *grid) updateEdges(p point) {
-	if p.x < g.edges[0].x {
-		g.edges[0].x = p.x
-	}
-	if p.y < g.edges[0].y {
-		g.edges[0].y = p.y
-	}
-	if p.x > g.edges[1].x {
-		g.edges[1].x = p.x
-	}
-	if p.y > g.edges[1].y {
-		g.edges[1].y = p.y
-	}
-}
-
-func (g *grid) getSizeX() int32 {
-	return g.edges[1].x - g.edges[0].x + 1
-}
-
-func (g *grid) getSizeY() int32 {
-	return g.edges[1].y - g.edges[0].y + 1
-}
-
-func (g *grid) getMinRectangular() [2]point {
+func (g *Grid) getMinRectangular() [2]Point {
 	var left, right, top, bottom int32
-	g.cells.Range(func(p point, c *cell) bool {
-		if c.state == ELF {
-			if p.x < left {
-				left = p.x
+	g.Cells.Range(func(p Point, c *Cell) bool {
+		if c.State == ELF {
+			if p.X < left {
+				left = p.X
 			}
-			if p.x > right {
-				right = p.x
+			if p.X > right {
+				right = p.X
 			}
-			if p.y < top {
-				top = p.y
+			if p.Y < top {
+				top = p.Y
 			}
-			if p.y > bottom {
-				bottom = p.y
+			if p.Y > bottom {
+				bottom = p.Y
 			}
 		}
 		return true
 	})
 
-	return [2]point{
-		{x: left, y: top},
-		{x: right, y: bottom},
+	return [2]Point{
+		{X: left, Y: top},
+		{X: right, Y: bottom},
 	}
 }
 
-func (g *grid) getEmptyCellCount() int {
+func (g *Grid) getEmptyCellCount() int {
 	var count int
 	rect := g.getMinRectangular()
-	for i := rect[0].y; i <= rect[1].y; i++ {
-		for j := rect[0].x; j <= rect[1].x; j++ {
-			p := point{x: j, y: i}
-			if c, ok := g.cells.Load(p); ok && c.state == EMPTY {
+	for i := rect[0].Y; i <= rect[1].Y; i++ {
+		for j := rect[0].X; j <= rect[1].X; j++ {
+			p := Point{X: j, Y: i}
+			if c, ok := g.Cells.Load(p); ok && c.State == EMPTY {
 				count++
 			} else if !ok {
 				count++
@@ -192,11 +153,11 @@ func (g *grid) getEmptyCellCount() int {
 	return count
 }
 
-func (g *grid) hasNeighborElves(ps *[8]point) byte {
+func (g *Grid) hasNeighborElves(ps *[8]Point) byte {
 	var bt byte
 	for i, p := range *ps {
-		if c, ok := g.cells.Load(p); ok {
-			if c.state == ELF {
+		if c, ok := g.Cells.Load(p); ok {
+			if c.State == ELF {
 				bt |= byte(1 << i)
 			}
 		}
@@ -205,46 +166,97 @@ func (g *grid) hasNeighborElves(ps *[8]point) byte {
 	return bt
 }
 
-func (p *point) getNeighborCells() [8]point {
-	return [8]point{
-		{x: p.x, y: p.y - 1},     //N
-		{x: p.x, y: p.y + 1},     //S
-		{x: p.x - 1, y: p.y},     //W
-		{x: p.x + 1, y: p.y},     //E
-		{x: p.x - 1, y: p.y - 1}, //NW
-		{x: p.x + 1, y: p.y - 1}, //NE
-		{x: p.x + 1, y: p.y + 1}, //SE
-		{x: p.x - 1, y: p.y + 1}, //SW
+func (p *Point) getNeighborCells() [8]Point {
+	return [8]Point{
+		{X: p.X, Y: p.Y - 1},     //N
+		{X: p.X, Y: p.Y + 1},     //S
+		{X: p.X - 1, Y: p.Y},     //W
+		{X: p.X + 1, Y: p.Y},     //E
+		{X: p.X - 1, Y: p.Y - 1}, //NW
+		{X: p.X + 1, Y: p.Y - 1}, //NE
+		{X: p.X + 1, Y: p.Y + 1}, //SE
+		{X: p.X - 1, Y: p.Y + 1}, //SW
 
 	}
 }
 
-func (g *grid) propose(p *point) bool {
+func (g *Grid) proposeOne(p *Point) *[2]Point {
 	nc := p.getNeighborCells()
 	hn := g.hasNeighborElves(&nc)
 	if hn == 0 {
-		return false
+		return nil
 	} else {
 		d := g.cur
 		for i := 0; i < 4; i++ {
 			rules := g.rules[d]
 			if hn&byte(1<<rules[0]) == 0 && hn&byte(1<<rules[1]) == 0 && hn&byte(1<<rules[2]) == 0 {
-				if elf, ok := g.cells.Load(*p); ok {
-					elf.dir = d
-				}
-				if c, ok := g.cells.Load(nc[d]); ok {
-					c.proposed++
+				cell := NewCell()
+				if c, ok := g.Cells.LoadOrStore(nc[d], cell); ok {
+					cell.Proposed.Add(c.Proposed.Value())
 				} else {
-					c = &cell{}
-					c.proposed++
-					g.cells.Store(nc[d], c)
+					cell.Proposed.Inc()
 				}
 
-				return true
+				return &[2]Point{*p, nc[d]}
 			}
 			d = (d + 1) % 4
 		}
 	}
 
-	return false
+	return nil
+}
+
+func (g *Grid) Propose(iteration int) []*[2]Point {
+	canMove := make([]*[2]Point, 0)
+	g.cur = iteration % 4
+	g.Cells.Range(func(p Point, c *Cell) bool {
+		if c.State == ELF {
+			nc := p.getNeighborCells()
+			hn := g.hasNeighborElves(&nc)
+			if hn > 0 {
+				d := g.cur
+				for i := 0; i < 4; i++ {
+					rules := g.rules[d]
+					if hn&byte(1<<rules[0]) == 0 && hn&byte(1<<rules[1]) == 0 && hn&byte(1<<rules[2]) == 0 {
+						if cell, ok := g.Cells.Load(nc[d]); ok {
+							cell.Proposed.Inc()
+						} else {
+							cl := NewCell()
+							cl.Proposed.Inc()
+							g.Cells.Store(nc[d], cl)
+						}
+						canMove = append(canMove, &[2]Point{p, nc[d]})
+						return true
+					}
+					d = (d + 1) % 4
+				}
+			}
+		}
+		return true
+	})
+
+	return canMove
+}
+
+func (g *Grid) moveOne(move *[2]Point) {
+	if c, ok := g.Cells.Load(move[1]); ok {
+		if c.Proposed.Value() == 1 {
+			c.State = ELF
+			e, _ := g.Cells.Load(move[0])
+			e.State = EMPTY
+		}
+	}
+}
+
+func (g *Grid) Move(moves []*[2]Point) {
+	for _, move := range moves {
+		if c, ok := g.Cells.Load(move[1]); ok {
+			if c.Proposed.Value() == 1 {
+				c.State = ELF
+				e, _ := g.Cells.Load(move[0])
+				e.State = EMPTY
+			}
+			c.Proposed.Reset()
+		}
+	}
 }
