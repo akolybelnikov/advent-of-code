@@ -6,6 +6,7 @@ import (
 	"golang.org/x/exp/constraints"
 	"math"
 	"os"
+	"sync"
 )
 
 const NEWLINE = 10
@@ -151,4 +152,13 @@ func Gcd(a, b int) int {
 		return a
 	}
 	return Gcd(b, a%b)
+}
+
+func LenSyncMap(m *sync.Map) int {
+	var i int
+	m.Range(func(k, v interface{}) bool {
+		i++
+		return true
+	})
+	return i
 }

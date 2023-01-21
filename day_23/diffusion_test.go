@@ -4,7 +4,7 @@ import (
 	_ "embed"
 	utils "github.com/akolybelnikov/advent-of-code"
 	"github.com/akolybelnikov/advent-of-code/day_23"
-	"github.com/go-playground/assert/v2"
+	"github.com/stretchr/testify/assert"
 	"sort"
 	"testing"
 	"time"
@@ -71,18 +71,21 @@ func TestSmallInput(t *testing.T) {
 	arr, _ := utils.MakeBytesArray(&smallTestInput)
 	g := day_23.NewGrid(arr)
 
-	var elves []day_23.Point
+	var elves []*day_23.Point
 
 	t.Run("grid has cells with elves on the right places", func(t *testing.T) {
-		assert.Equal(t, g.Cells.Size(), 30)
+		assert.Equal(t, utils.LenSyncMap(&g.Cells), 30)
 
-		g.Cells.Range(func(p day_23.Point, c *day_23.Cell) bool {
+		g.Cells.Range(func(k, v any) bool {
+			c := v.(*day_23.Cell)
 			if c.State == day_23.ELF {
-				elves = append(elves, p)
+				elves = append(elves, c.Point)
 			}
 			return true
 		})
+
 		assert.Equal(t, len(elves), 5)
+
 		sort.Slice(elves, func(i, j int) bool {
 			if elves[i].Y == elves[j].Y {
 				return elves[i].X < elves[j].X
@@ -90,6 +93,7 @@ func TestSmallInput(t *testing.T) {
 				return elves[i].Y < elves[j].Y
 			}
 		})
+
 		assert.Equal(t, elves[0].X, int32(2))
 		assert.Equal(t, elves[0].Y, int32(1))
 		assert.Equal(t, elves[1].X, int32(3))
@@ -101,8 +105,11 @@ func TestSmallInput(t *testing.T) {
 		assert.Equal(t, elves[4].X, int32(3))
 		assert.Equal(t, elves[4].Y, int32(4))
 
-		moves := g.Propose(0)
-		assert.Equal(t, len(moves), 5)
+		assert.Equal(t, utils.LenSyncMap(&g.Cells), 30)
+
+		elvesCanMove0 := g.Propose(0)
+
+		assert.Equal(t, len(elvesCanMove0), 5)
 
 		testCells := []*testCase{
 			{
@@ -133,23 +140,28 @@ func TestSmallInput(t *testing.T) {
 		}
 
 		for _, cell := range testCells {
-			if c, ok := g.Cells.Load(cell.point); ok {
+			h := day_23.GetHash(cell.point)
+			if v, ok := g.Cells.Load(h); ok {
+				c := v.(*day_23.Cell)
 				assert.Equal(t, c.Proposed.Value(), cell.proposedBeforeMove)
 				assert.Equal(t, c.State, cell.stateBeforeMove)
 			}
 		}
 
-		g.Move(moves)
+		g.Move(elvesCanMove0)
 
 		for _, cell := range testCells {
-			if c, ok := g.Cells.Load(cell.point); ok {
+			h := day_23.GetHash(cell.point)
+			if v, ok := g.Cells.Load(h); ok {
+				c := v.(*day_23.Cell)
 				assert.Equal(t, c.Proposed.Value(), cell.proposedAfterMove)
 				assert.Equal(t, c.State, cell.stateAfterMove)
 			}
 		}
 
-		moves1 := g.Propose(1)
-		assert.Equal(t, len(moves1), 5)
+		elvesCanMove1 := g.Propose(1)
+
+		assert.Equal(t, len(elvesCanMove1), 5)
 
 		testCells = []*testCase{
 			{
@@ -190,23 +202,28 @@ func TestSmallInput(t *testing.T) {
 		}
 
 		for _, cell := range testCells {
-			if c, ok := g.Cells.Load(cell.point); ok {
+			h := day_23.GetHash(cell.point)
+			if v, ok := g.Cells.Load(h); ok {
+				c := v.(*day_23.Cell)
 				assert.Equal(t, c.Proposed.Value(), cell.proposedBeforeMove)
 				assert.Equal(t, c.State, cell.stateBeforeMove)
 			}
 		}
 
-		g.Move(moves1)
+		g.Move(elvesCanMove1)
 
 		for _, cell := range testCells {
-			if c, ok := g.Cells.Load(cell.point); ok {
+			h := day_23.GetHash(cell.point)
+			if v, ok := g.Cells.Load(h); ok {
+				c := v.(*day_23.Cell)
 				assert.Equal(t, c.Proposed.Value(), cell.proposedAfterMove)
 				assert.Equal(t, c.State, cell.stateAfterMove)
 			}
 		}
 
-		moves2 := g.Propose(2)
-		assert.Equal(t, len(moves2), 3)
+		elvesCanMove2 := g.Propose(2)
+
+		assert.Equal(t, len(elvesCanMove2), 3)
 
 		testCells = []*testCase{
 			{
@@ -233,19 +250,37 @@ func TestSmallInput(t *testing.T) {
 		}
 
 		for _, cell := range testCells {
-			if c, ok := g.Cells.Load(cell.point); ok {
+			h := day_23.GetHash(cell.point)
+			if v, ok := g.Cells.Load(h); ok {
+				c := v.(*day_23.Cell)
 				assert.Equal(t, c.Proposed.Value(), cell.proposedBeforeMove)
 				assert.Equal(t, c.State, cell.stateBeforeMove)
 			}
 		}
 
-		g.Move(moves2)
+		g.Move(elvesCanMove2)
 
 		for _, cell := range testCells {
-			if c, ok := g.Cells.Load(cell.point); ok {
+			h := day_23.GetHash(cell.point)
+			if v, ok := g.Cells.Load(h); ok {
+				c := v.(*day_23.Cell)
 				assert.Equal(t, c.Proposed.Value(), cell.proposedAfterMove)
 				assert.Equal(t, c.State, cell.stateAfterMove)
 			}
 		}
 	})
+}
+
+func BenchmarkUnstableDiffusion(b *testing.B) {
+	arr, _ := utils.MakeBytesArray(&input)
+	for i := 0; i < b.N; i++ {
+		day_23.UnstableDiffusion(arr)
+	}
+}
+
+func BenchmarkUnstableDiffusion2(b *testing.B) {
+	arr, _ := utils.MakeBytesArray(&input)
+	for i := 0; i < b.N; i++ {
+		day_23.UnstableDiffusion2(arr)
+	}
 }
