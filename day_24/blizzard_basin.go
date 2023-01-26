@@ -11,77 +11,156 @@ const (
 	W
 )
 
-type Point struct {
-	X int
-	Y int
+type point struct {
+	x int
+	y int
 }
 
-type Queue []*State
+type queue []*state
 
-type State struct {
+type state struct {
 	minute int
-	x      int
-	y      int
+	point  point
+	stage  int
+}
+
+type basin struct {
+	blizzards          *map[point]uint8
+	cache              *map[state]struct{}
+	directions         [][2]int
+	height, width, lcm int
 }
 
 func FindPath(arr *[]*[]byte) int {
-	blizzards := MakeBlizzards(arr)
-	width := len(*(*arr)[0]) - 2
-	height := len(*arr) - 2
-	targetX := width - 1
-	targetY := height
-	lcm := width * height / utils.Gcd(width, height)
-	cache := make(map[State]struct{})
-	q := NewQueue()
+	b := newBasin(arr)
+
+	start := point{0, -1}
+	target := point{b.width - 1, b.height}
+	q := newQueue()
 	q.enqueue(
-		State{
+		state{
 			minute: 0,
-			x:      0,
-			y:      -1,
+			point:  start,
+			stage:  0,
 		})
 
-	directions := [][2]int{
-		{0, -1},
-		{1, 0},
-		{0, 1},
-		{-1, 0},
-		{0, 0},
+	return q.run(start, target, b)
+}
+
+func FindPath2(arr *[]*[]byte) int {
+	b := newBasin(arr)
+
+	gates := []point{{b.width - 1, b.height}, {0, -1}}
+	q := newQueue()
+	q.enqueue(state{
+		minute: 0,
+		point:  gates[1],
+		stage:  0,
+	})
+
+	return q.run2(gates, b)
+}
+
+func newBasin(arr *[]*[]byte) *basin {
+	cache := make(map[state]struct{})
+	b := basin{
+		blizzards: MakeBlizzards(arr),
+		cache:     &cache,
+		width:     len(*(*arr)[0]) - 2,
+		height:    len(*arr) - 2,
+		directions: [][2]int{
+			{0, -1},
+			{1, 0},
+			{0, 1},
+			{-1, 0},
+			{0, 0},
+		},
 	}
+	b.lcm = b.width * b.height / utils.Gcd(b.width, b.height)
+	return &b
+}
 
-	start := Point{0, -1}
+func newQueue() *queue {
+	q := make(queue, 0)
+	return &q
+}
 
+func (q *queue) enqueue(s state) {
+	*q = append(*q, &s)
+}
+
+func (q *queue) dequeue() *state {
+	if len(*q) == 0 {
+		return nil
+	}
+	res := (*q)[0]
+	*q = (*q)[1:]
+	return res
+}
+
+func (q *queue) run(start, target point, basin *basin) int {
 	for len(*q) > 0 {
 		s := q.dequeue()
 		time := s.minute + 1
-		for _, d := range directions {
-			np := Point{s.x + d[0], s.y + d[1]}
+		for _, d := range basin.directions {
+			np := point{s.point.x + d[0], s.point.y + d[1]}
 
-			if np.Y == targetY && np.X == targetX {
+			if np == target {
 				return time
 			}
 
-			if (np.Y >= 0 && np.Y < height && np.X >= 0 && np.X < width && np != start) || np == start {
+			if (basin.containsPoint(&np) && np != start) || np == start {
 				collides := false
 				if np != start {
-					for i, dr := range directions[:4] {
-						nx := ((np.X-dr[0]*time)%width + width) % width
-						ny := ((np.Y-dr[1]*time)%height + height) % height
-						if blizzard, ok := (*blizzards)[Point{nx, ny}]; ok {
-							if blizzard == uint8(i) {
-								collides = true
-								break
-							}
-						}
-					}
+					collides = basin.collides(&np, time)
 				}
 
 				if !collides {
-					cacheState := State{minute: time % lcm, x: np.X, y: np.Y}
-					if _, ok := cache[cacheState]; ok {
+					cacheState := state{minute: time % basin.lcm, point: np}
+					if _, ok := (*basin.cache)[cacheState]; ok {
 						continue
 					}
-					cache[cacheState] = struct{}{}
-					queueState := State{minute: time, x: np.X, y: np.Y}
+					(*basin.cache)[cacheState] = struct{}{}
+					queueState := state{minute: time, point: np}
+					q.enqueue(queueState)
+				}
+			}
+		}
+
+	}
+	return 0
+}
+
+func (q *queue) run2(gates []point, basin *basin) int {
+	for len(*q) > 0 {
+		s := q.dequeue()
+		time := s.minute + 1
+		gate := gates[s.stage%2]
+		for _, d := range basin.directions {
+			np := point{s.point.x + d[0], s.point.y + d[1]}
+			nextStage := s.stage
+
+			if np == gate {
+				if s.stage == 2 {
+					return time
+				}
+				nextStage++
+			}
+
+			if (basin.containsPoint(&np) && np != gates[0] && np != gates[1]) ||
+				np == gates[0] || np == gates[1] {
+				collides := false
+				if np != gates[0] && np != gates[1] {
+					collides = basin.collides(&np, time)
+				}
+
+				if !collides {
+					cacheState := state{minute: time % basin.lcm, point: np, stage: nextStage}
+					if _, ok := (*basin.cache)[cacheState]; ok {
+						continue
+					}
+					(*basin.cache)[cacheState] = struct{}{}
+					queueState := state{minute: time, point: np, stage: nextStage}
 					q.enqueue(queueState)
 				}
 			}
@@ -92,32 +171,32 @@ func FindPath(arr *[]*[]byte) int {
 	return 0
 }
 
-func (q *Queue) enqueue(s State) {
-	*q = append(*q, &s)
+func (b *basin) containsPoint(p *point) bool {
+	return p.y >= 0 && p.y < b.height && p.x >= 0 && p.x < b.width
 }
 
-func (q *Queue) dequeue() *State {
-	if len(*q) == 0 {
-		return nil
+func (b *basin) collides(p *point, time int) bool {
+	for i, dr := range b.directions[:4] {
+		nx := ((p.x-dr[0]*time)%b.width + b.width) % b.width
+		ny := ((p.y-dr[1]*time)%b.height + b.height) % b.height
+		if blizzard, ok := (*b.blizzards)[point{nx, ny}]; ok {
+			if blizzard == uint8(i) {
+				return true
+			}
+		}
 	}
-	res := (*q)[0]
-	*q = (*q)[1:]
-	return res
+
+	return false
 }
 
-func NewQueue() *Queue {
-	q := make(Queue, 0)
-	return &q
-}
-
-func MakeBlizzards(arr *[]*[]byte) *map[Point]uint8 {
+func MakeBlizzards(arr *[]*[]byte) *map[point]uint8 {
 	var ey, ex int
-	res := make(map[Point]uint8)
+	res := make(map[point]uint8)
 	for i, v := range *arr {
 		for i2, bt := range *v {
 			if bt != '#' {
 				ex, ey = i2-1, i-1
-				p := Point{X: ex, Y: ey}
+				p := point{x: ex, y: ey}
 				if bt != '.' {
 					switch bt {
 					case '^':
