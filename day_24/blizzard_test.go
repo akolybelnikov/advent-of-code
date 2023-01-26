@@ -33,3 +33,17 @@ func TestFindPath(t *testing.T) {
 		t.Logf("minutes: %d", minutes)
 	})
 }
+
+func TestFindPath2(t *testing.T) {
+	t.Run("test input", func(t *testing.T) {
+		arr, _ := utils.MakeBytesArray(&inputTest)
+		minutes := day_24.FindPath2(arr)
+		t.Logf("minutes: %d", minutes)
+	})
+
+	t.Run("input", func(t *testing.T) {
+		arr, _ := utils.MakeBytesArray(&input)
+		minutes := day_24.FindPath2(arr)
+		t.Logf("minutes: %d", minutes)
+	})
+}
