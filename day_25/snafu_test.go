@@ -25,7 +25,7 @@ func TestConvertDecimalSumToSnafu(t *testing.T) {
 	t.Run("real input", func(t *testing.T) {
 		arr, _ := utils.MakeBytesArray(&input)
 		sum := day_25.ConvertToDecimalSum(arr)
-		assert.Equal(t, 6593948721415, sum)
+		assert.Equal(t, 32969743607087, sum)
 		t.Logf("SNAFU: %s", day_25.ConvertToSnafu(sum))
 	})
 }
@@ -38,67 +38,67 @@ func TestConvertToDecimal(t *testing.T) {
 	}{
 		{
 			name:  "test 1=-0-2",
-			snafu: []byte("1=-0-2\n"),
+			snafu: []byte("1=-0-2"),
 			want:  1747,
 		},
 		{
 			name:  "test 12111",
-			snafu: []byte("12111\n"),
+			snafu: []byte("12111"),
 			want:  906,
 		},
 		{
 			name:  "test 2=0=",
-			snafu: []byte("2=0=\n"),
+			snafu: []byte("2=0="),
 			want:  198,
 		},
 		{
 			name:  "test 21",
-			snafu: []byte("21\n"),
+			snafu: []byte("21"),
 			want:  11,
 		},
 		{
 			name:  "test 2=01",
-			snafu: []byte("2=01\n"),
+			snafu: []byte("2=01"),
 			want:  201,
 		},
 		{
 			name:  "test 111",
-			snafu: []byte("111\n"),
+			snafu: []byte("111"),
 			want:  31,
 		},
 		{
 			name:  "test 20012",
-			snafu: []byte("20012\n"),
+			snafu: []byte("20012"),
 			want:  1257,
 		},
 		{
 			name:  "test 112",
-			snafu: []byte("112\n"),
+			snafu: []byte("112"),
 			want:  32,
 		},
 		{
 			name:  "test 1=-1=",
-			snafu: []byte("1=-1=\n"),
+			snafu: []byte("1=-1="),
 			want:  353,
 		},
 		{
 			name:  "test 1-12",
-			snafu: []byte("1-12\n"),
+			snafu: []byte("1-12"),
 			want:  107,
 		},
 		{
 			name:  "test 12",
-			snafu: []byte("12\n"),
+			snafu: []byte("12"),
 			want:  7,
 		},
 		{
 			name:  "test 1=",
-			snafu: []byte("1=\n"),
+			snafu: []byte("1="),
 			want:  3,
 		},
 		{
 			name:  "test 122",
-			snafu: []byte("122\n"),
+			snafu: []byte("122"),
 			want:  37,
 		},
 	}

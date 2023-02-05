@@ -36,12 +36,18 @@ func ConvertToSnafu(sum int) string {
 func ConvertToDecimal(input *[]byte) int {
 	var sum int
 	coef := 1
-	for i := len(*input) - 2; i >= 0; i-- {
+	if (*input)[len(*input)-1] == '\r' || (*input)[len(*input)-1] == '\n' {
+		*input = (*input)[:len(*input)-1]
+	}
+
+	for i := len(*input) - 1; i >= 0; i-- {
 		switch (*input)[i] {
 		case '=':
 			sum -= 2 * coef
 		case '-':
 			sum -= coef
+		case '0':
+			sum += 0 * coef
 		case '1':
 			sum += coef
 		case '2':
@@ -49,6 +55,5 @@ func ConvertToDecimal(input *[]byte) int {
 		}
 		coef *= 5
 	}
-
 	return sum
 }
