@@ -1,1 +1,0 @@
-/Users/andrey.kolybelnikov/GolandProjects/advent/rust/target/debug/day_1: /Users/andrey.kolybelnikov/GolandProjects/advent/rust/crates/day_1/src/main.rs /Users/andrey.kolybelnikov/GolandProjects/advent/rust/crates/day_1/src/test_input.txt
