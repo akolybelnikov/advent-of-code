@@ -21,15 +21,21 @@ rust/target/
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 **/*.out
+*.prof
+coverage.txt
 
 # Dependency directories (remove the comment below to include it)
-# vendor/
+vendor/
 
 # Go workspace file
 **/go.work
 
 # IDE
 .idea
+.idea/
+.vscode/
+*.swp
+*.swo
 
 # Resources and images
 resources
@@ -38,3 +44,30 @@ output.gif
 
 # Input files
 *.txt
+inputs/
+cmd/day*
+
+# Log files
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak
+*.old
+*.orig
+*.rej
+*.sublime-workspace
+
+# Built executables
+/dist/
+/build/
+/bin/
+/*.o
+
+# Modules cache
+mod/
+pkg/
