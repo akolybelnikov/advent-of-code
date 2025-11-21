@@ -26,3 +26,11 @@ rust/target/
 
 # Go workspace file
 **/go.work
+
+# IDE
+.idea
+
+# Resources and images
+resources
+images
+output.gif
