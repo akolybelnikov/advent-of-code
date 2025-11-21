@@ -45,8 +45,8 @@ Downloaded input will be stored in the /inputs directory.`,
 		}
 
 		// Validate language
-		if language != "go" && language != "elixir" {
-			fmt.Println("Invalid language. Please choose 'go' or 'elixir'.")
+		if language != "go" && language != "elixir" && language != "rust" {
+			fmt.Println("Invalid language. Please choose 'go', 'elixir', or 'rust'.")
 			return
 		}
 
@@ -59,7 +59,7 @@ Downloaded input will be stored in the /inputs directory.`,
 				return
 			}
 			dayFolder = filepath.Join(downloadPath, "cmd", fmt.Sprintf("day%02d", day))
-		} else {
+		} else if language == "elixir" {
 			// For Elixir, create lib and test directories
 			libPath := filepath.Join(downloadPath, "lib")
 			testPath := filepath.Join(downloadPath, "test")
@@ -74,6 +74,15 @@ Downloaded input will be stored in the /inputs directory.`,
 				return
 			}
 			dayFolder = downloadPath
+		} else if language == "rust" {
+			// For Rust, create src/bin/dayXX directory
+			binPath := filepath.Join(downloadPath, "src", "bin", fmt.Sprintf("day%02d", day))
+			err := os.MkdirAll(binPath, os.ModePerm)
+			if err != nil {
+				fmt.Printf("Failed to create bin directory at %s: %v\n", downloadPath, err)
+				return
+			}
+			dayFolder = binPath
 		}
 
 		err := copyTemplate(dayFolder)
@@ -109,7 +118,7 @@ func init() {
 	bootstrapCmd.Flags().IntVarP(&day, "day", "d", 0, "Day of Advent of Code (1-25)")
 	bootstrapCmd.Flags().IntVarP(&downloadYear, "year", "y", 0, "Advent of Code year (default: current year)")
 	bootstrapCmd.Flags().StringVarP(&downloadPath, "path", "p", "", "Custom path for downloading files")
-	bootstrapCmd.Flags().StringVarP(&language, "lang", "l", "go", "Language for the solution (go, elixir)")
+	bootstrapCmd.Flags().StringVarP(&language, "lang", "l", "go", "Language for the solution (go, elixir, rust)")
 	rootCmd.AddCommand(bootstrapCmd)
 }
 
@@ -162,6 +171,11 @@ func copyTemplate(targetPath string) error {
 			} else if strings.HasSuffix(fileName, "test.exs") {
 				fileName = fmt.Sprintf("day%s_test.exs", dayStr)
 				destPath = filepath.Join(targetPath, "test", fileName)
+			}
+		} else if language == "rust" {
+			// Handle file renaming logic for Rust
+			if strings.HasSuffix(fileName, "main.rs") {
+				destPath = filepath.Join(targetPath, "main.rs")
 			}
 		}
 

@@ -24,6 +24,7 @@ inputs. It creates a new solution directory for the given day and populates it w
 The CLI supports multiple languages for bootstrapping solutions:
 - **Go** (default) - Creates files in `cmd/dayXX/`
 - **Elixir** - Creates files in `lib/` and `test/`
+- **Rust** - Creates files in `src/bin/dayXX/`
 
 ### Examples
 
@@ -37,6 +38,11 @@ Bootstrap an Elixir solution:
 aoc-cli bootstrap --day 5 --path /projects/my-project --lang elixir
 ```
 
+Bootstrap a Rust solution:
+```shell
+aoc-cli bootstrap --day 5 --path /projects/my-project --lang rust
+```
+
 ### What Gets Created
 
 **For Go:**
@@ -47,6 +53,10 @@ aoc-cli bootstrap --day 5 --path /projects/my-project --lang elixir
 **For Elixir:**
 - `lib/day05.ex` - Solution module with `part1()`, `part2()`, and `solve()` functions
 - `test/day05_test.exs` - ExUnit test file
+- `inputs/day05.txt` - Input file (if session is configured)
+
+**For Rust:**
+- `src/bin/day05/main.rs` - Solution binary with `part1()`, `part2()`, and tests
 - `inputs/day05.txt` - Input file (if session is configured)
 
 If valid session credentials are already configured, the input file will be downloaded automatically.
