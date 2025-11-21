@@ -1,0 +1,89 @@
+[package]
+name = "advent_of_code_2023"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+regex = "1.10.2"
+lazy_static = "1.4.0"
+itertools = { version = "0.12.0", features = [] }
+rayon = "1.8.0"
+log = "0.4.20"
+rand = "0.8.5"
+rustworkx-core = "0.13.2"
+
+[[bin]]
+name = "day01"
+path = "src/bin/day01/main.rs"
+[[bin]]
+name = "day02"
+path = "src/bin/day02/main.rs"
+[[bin]]
+name = "day03"
+path = "src/bin/day03/main.rs"
+[[bin]]
+name = "day04"
+path = "src/bin/day04/main.rs"
+[[bin]]
+name = "day05"
+path = "src/bin/day05/main.rs"
+[[bin]]
+name = "day06"
+path = "src/bin/day06/main.rs"
+[[bin]]
+name = "day07"
+path = "src/bin/day07/main.rs"
+[[bin]]
+name = "day08"
+path = "src/bin/day08/main.rs"
+[[bin]]
+name = "day09"
+path = "src/bin/day09/main.rs"
+[[bin]]
+name = "day10"
+path = "src/bin/day10/main.rs"
+[[bin]]
+name = "day11"
+path = "src/bin/day11/main.rs"
+[[bin]]
+name = "day12"
+path = "src/bin/day12/main.rs"
+[[bin]]
+name = "day13"
+path = "src/bin/day13/main.rs"
+[[bin]]
+name = "day14"
+path = "src/bin/day14/main.rs"
+[[bin]]
+name = "day15"
+path = "src/bin/day15/main.rs"
+[[bin]]
+name = "day16"
+path = "src/bin/day16/main.rs"
+[[bin]]
+name = "day17"
+path = "src/bin/day17/main.rs"
+[[bin]]
+name = "day18"
+path = "src/bin/day18/main.rs"
+[[bin]]
+name = "day19"
+path = "src/bin/day19/main.rs"
+[[bin]]
+name = "day20"
+path = "src/bin/day20/main.rs"
+[[bin]]
+name = "day21"
+path = "src/bin/day21/main.rs"
+[[bin]]
+name = "day22"
+path = "src/bin/day22/main.rs"
+[[bin]]
+name = "day23"
+path = "src/bin/day23/main.rs"
+[[bin]]
+name = "day24"
+path = "src/bin/day24/main.rs"
+[[bin]]
+name = "day25"
+path = "src/bin/day25/main.rs"
