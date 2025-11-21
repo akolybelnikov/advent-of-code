@@ -19,19 +19,37 @@ go install github.com/akolybelnikov/aoc-cli@latest
 The `bootstrap` command helps you quickly set up your solution for a specific day and download the corresponding puzzle 
 inputs. It creates a new solution directory for the given day and populates it with the necessary boilerplate code.
 
-### Example
-To initialize a solution for Day 5, run:
+### Supported Languages
 
+The CLI supports multiple languages for bootstrapping solutions:
+- **Go** (default) - Creates files in `cmd/dayXX/`
+- **Elixir** - Creates files in `lib/` and `test/`
+
+### Examples
+
+Bootstrap a Go solution (default):
 ```shell
 aoc-cli bootstrap --day 5 --path /projects/my-project
 ```
 
-- A solution file pre-filled with boilerplate code.
-- A test file for `day05`.
-- Placeholder values replaced dynamically (e.g., day number).
+Bootstrap an Elixir solution:
+```shell
+aoc-cli bootstrap --day 5 --path /projects/my-project --lang elixir
+```
 
-If valid session credentials are already configured, the input file for Day 5 will also be downloaded into the project 
-directory automatically.
+### What Gets Created
+
+**For Go:**
+- `cmd/day05/day05.go` - Solution file with `part1()` and `part2()` functions
+- `cmd/day05/day05_test.go` - Test file
+- `inputs/day05.txt` - Input file (if session is configured)
+
+**For Elixir:**
+- `lib/day05.ex` - Solution module with `part1()`, `part2()`, and `solve()` functions
+- `test/day05_test.exs` - ExUnit test file
+- `inputs/day05.txt` - Input file (if session is configured)
+
+If valid session credentials are already configured, the input file will be downloaded automatically.
 
 ## Auth - Session Management
 
