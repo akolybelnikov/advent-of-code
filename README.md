@@ -10,6 +10,7 @@ This mono-repository contains solutions for multiple years in different language
 - `2022/` - Go solutions (see [README](2022/README.md))
 - `2023/` - Rust solutions (see [README](2023/README.md))
 - `2024/` - Go solutions (see [README](2024/README.md))
+- `2025/` - Elixir solutions (see [README](2025/README.md))
 - `cli/` - AOC CLI tool for automating daily challenges
 
 ## AOC CLI Tool
