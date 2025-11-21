@@ -14,6 +14,18 @@ You can install the CLI directly using Go without cloning the repository.
 go install github.com/akolybelnikov/aoc-cli@latest
 ```
 
+### First Time Setup
+
+**Important:** Before using the bootstrap command, you need to authenticate with your Advent of Code session token:
+
+```bash
+aoc-cli auth
+```
+
+The CLI will prompt you for your session token and store it securely in `~/.aoc-session`. This is required to download puzzle inputs automatically.
+
+See the [Auth - Session Management](#auth---session-management) section below for details on how to get your session token.
+
 ## Bootstrap a day's solution and download your puzzle inputs
 
 The `bootstrap` command helps you quickly set up your solution for a specific day and download the corresponding puzzle 
