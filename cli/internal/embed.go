@@ -6,5 +6,5 @@ import (
 
 // Templates is the embedded filesystem containing the templates.
 //
-//go:embed templates/*
+//go:embed templates/**/*
 var Templates embed.FS

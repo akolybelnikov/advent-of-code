@@ -19,6 +19,7 @@ import (
 )
 
 var downloadPath string
+var language string
 
 // bootstrapCmd represents the bootstrap command
 var bootstrapCmd = &cobra.Command{
@@ -42,21 +43,40 @@ Downloaded input will be stored in the /inputs directory.`,
 			fmt.Printf("Please provide a path to the project root.\n")
 			return
 		}
-		cmdPath := filepath.Join(downloadPath, "cmd")
 
-		err := os.MkdirAll(cmdPath, os.ModePerm)
-		if err != nil {
-			fmt.Printf("Failed to create directory at %s: %v\n", downloadPath, err)
+		// Validate language
+		if language != "go" && language != "elixir" {
+			fmt.Println("Invalid language. Please choose 'go' or 'elixir'.")
 			return
 		}
 
-		if err != nil {
-			fmt.Printf("Failed to get working directory: %v\n", err)
-			return
+		var dayFolder string
+		if language == "go" {
+			cmdPath := filepath.Join(downloadPath, "cmd")
+			err := os.MkdirAll(cmdPath, os.ModePerm)
+			if err != nil {
+				fmt.Printf("Failed to create directory at %s: %v\n", downloadPath, err)
+				return
+			}
+			dayFolder = filepath.Join(downloadPath, "cmd", fmt.Sprintf("day%02d", day))
+		} else {
+			// For Elixir, create lib and test directories
+			libPath := filepath.Join(downloadPath, "lib")
+			testPath := filepath.Join(downloadPath, "test")
+			err := os.MkdirAll(libPath, os.ModePerm)
+			if err != nil {
+				fmt.Printf("Failed to create lib directory at %s: %v\n", downloadPath, err)
+				return
+			}
+			err = os.MkdirAll(testPath, os.ModePerm)
+			if err != nil {
+				fmt.Printf("Failed to create test directory at %s: %v\n", downloadPath, err)
+				return
+			}
+			dayFolder = downloadPath
 		}
 
-		dayFolder := filepath.Join(downloadPath, "cmd", fmt.Sprintf("day%02d", day))
-		err = copyTemplate(dayFolder)
+		err := copyTemplate(dayFolder)
 		if err != nil {
 			fmt.Printf("Failed to copy template: %v\n", err)
 			return
@@ -89,27 +109,27 @@ func init() {
 	bootstrapCmd.Flags().IntVarP(&day, "day", "d", 0, "Day of Advent of Code (1-25)")
 	bootstrapCmd.Flags().IntVarP(&downloadYear, "year", "y", 0, "Advent of Code year (default: current year)")
 	bootstrapCmd.Flags().StringVarP(&downloadPath, "path", "p", "", "Custom path for downloading files")
+	bootstrapCmd.Flags().StringVarP(&language, "lang", "l", "go", "Language for the solution (go, elixir)")
 	rootCmd.AddCommand(bootstrapCmd)
 }
 
 // copyTemplate copies files from templatePath to targetPath
 func copyTemplate(targetPath string) error {
 	dayStr := fmt.Sprintf("%02d", day)
+	templateDir := filepath.Join("templates", language)
 
-	return fs.WalkDir(internal.Templates, ".", func(path string, d fs.DirEntry, err error) error {
+	return fs.WalkDir(internal.Templates, templateDir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
 
-		// Skip the root "templates" directory itself
-		if path == "templates" {
+		// Skip the template directory itself
+		if path == templateDir {
 			return nil
 		}
 
 		if d.IsDir() {
-			// Mirror the directory structure
-			destDir := filepath.Join(targetPath, path)
-			return os.MkdirAll(destDir, os.ModePerm)
+			return nil
 		}
 
 		// Read file content from embedded template
@@ -120,18 +140,30 @@ func copyTemplate(targetPath string) error {
 
 		// Replace placeholders
 		updatedContent := strings.ReplaceAll(string(content), "{{DAY}}", dayStr)
-		updatedContent = strings.ReplaceAll(updatedContent, "package templates", fmt.Sprintf("package main"))
 
-		// Handle file renaming logic
+		var destPath string
 		fileName := filepath.Base(path)
-		if strings.HasSuffix(fileName, "solution.go") {
-			fileName = fmt.Sprintf("day%s.go", dayStr)
-		} else if strings.HasSuffix(fileName, "test.go") {
-			fileName = fmt.Sprintf("day%s_test.go", dayStr)
-		}
 
-		// Determine destination path
-		destPath := filepath.Join(targetPath, fileName)
+		if language == "go" {
+			updatedContent = strings.ReplaceAll(updatedContent, "package templates", "package main")
+
+			// Handle file renaming logic for Go
+			if strings.HasSuffix(fileName, "solution.go") {
+				fileName = fmt.Sprintf("day%s.go", dayStr)
+			} else if strings.HasSuffix(fileName, "test.go") {
+				fileName = fmt.Sprintf("day%s_test.go", dayStr)
+			}
+			destPath = filepath.Join(targetPath, fileName)
+		} else if language == "elixir" {
+			// Handle file renaming logic for Elixir
+			if strings.HasSuffix(fileName, "solution.ex") {
+				fileName = fmt.Sprintf("day%s.ex", dayStr)
+				destPath = filepath.Join(targetPath, "lib", fileName)
+			} else if strings.HasSuffix(fileName, "test.exs") {
+				fileName = fmt.Sprintf("day%s_test.exs", dayStr)
+				destPath = filepath.Join(targetPath, "test", fileName)
+			}
+		}
 
 		// Write the updated content to the destination file
 		return os.WriteFile(destPath, []byte(updatedContent), os.ModePerm)
