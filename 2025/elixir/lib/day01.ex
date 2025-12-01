@@ -37,11 +37,12 @@ defmodule Day01 do
 
     times =
       cond do
-        clicks < pos -> 0
-        pos != 0 && 100 > clicks && clicks >= pos -> 1
-        pos == 0 && 100 > clicks -> 0
-        pos == 0 && 100 == clicks -> 1
-        true -> div(clicks + 99, 100)
+        # Start at 0, count every 100
+        pos == 0 -> div(clicks, 100)
+        # Cross 0 at pos clicks, then every 100
+        clicks >= pos -> 1 + div(clicks - pos, 100)
+        # Don't reach 0
+        true -> 0
       end
 
     {Integer.mod(pos - clicks, 100), times}
@@ -50,11 +51,8 @@ defmodule Day01 do
   def rotate("R" <> clicks, pos) do
     clicks = String.to_integer(clicks)
 
-    times =
-      cond do
-        clicks < 100 - pos -> 0
-        true -> div(clicks + 99, 100)
-      end
+    threshold = 100 - pos
+    times = if clicks >= threshold, do: 1 + div(clicks - threshold, 100), else: 0
 
     {Integer.mod(pos + clicks, 100), times}
   end

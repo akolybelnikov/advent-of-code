@@ -25,7 +25,7 @@ defmodule Day01Test do
     end
 
     test "real" do
-      expected = 0
+      expected = 6106
       actual = Day01.part2(@input)
       assert actual == expected
     end
