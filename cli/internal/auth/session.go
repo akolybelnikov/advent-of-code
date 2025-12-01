@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -20,7 +21,8 @@ func GetSession() (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("unable to read session file: %w", err)
 	}
-	return string(data), nil
+	// Trim whitespace/newlines which commonly get included when saving the session
+	return strings.TrimSpace(string(data)), nil
 }
 
 // SaveSession saves the provided session string to a file in the user's home directory, creating or overwriting it if needed.
@@ -49,12 +51,15 @@ func ValidateSession(session string, year int) error {
 	}
 	req.Header.Add("Cookie", fmt.Sprintf("session=%s", session))
 	resp, err := client.Do(req)
-	if err != nil || resp.StatusCode != http.StatusOK {
-		return err
+	if err != nil {
+		return fmt.Errorf("failed to validate session: %w", err)
 	}
 	defer func(Body io.ReadCloser) {
 		_ = Body.Close()
 	}(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("session validation failed: %s", resp.Status)
+	}
 	return nil
 }
 

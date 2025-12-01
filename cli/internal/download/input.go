@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 func Input(year, day int, session string, path string) error {
@@ -16,6 +17,8 @@ func Input(year, day int, session string, path string) error {
 	client := &http.Client{}
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Set("Cookie", "session="+session)
+	// Advent of Code may reject requests without a proper User-Agent — set one
+	req.Header.Set("User-Agent", "aoc-cli/1.0 (+https://github.com/akolybelnikov)")
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -26,6 +29,13 @@ func Input(year, day int, session string, path string) error {
 	}(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
+		// try to read a small snippet of the body for helpful diagnostic info
+		buf := make([]byte, 1024)
+		n, _ := resp.Body.Read(buf)
+		snippet := strings.TrimSpace(string(buf[:n]))
+		if snippet != "" {
+			return fmt.Errorf("failed to download %s: %s (body: %.200s)", url, resp.Status, snippet)
+		}
 		return fmt.Errorf("failed to download %s: %s", url, resp.Status)
 	}
 

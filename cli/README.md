@@ -1,114 +1,137 @@
 # Advent of Code CLI
 
-A CLI tool to automate downloading inputs for Advent of Code, written in Go.
+A small command-line tool to bootstrap Advent of Code solutions and download puzzle inputs.
 
-## Installation
+This README describes how to build, install, and use the CLI (including new flags to control template source and skipping downloads), and how to troubleshoot the most common issues (templates not found on Windows, authentication/400 errors).
 
-You can install the CLI directly using Go without cloning the repository.
+## Requirements
 
-### Requirements
-- Go 1.19+ installed
+- Go 1.19+ to build from source
 
-### Install via Go
+## Install
+
+Install the released binary (if available) or build from source.
+
+Build from source (recommended if you want the latest fixes):
+
+```bash
+cd /c/Users/akoly/GolandProjects/advent-of-code/cli
+go build -o ../bin/aoc-cli.exe main.go
+```
+
+After building, the executable will be at `../bin/aoc-cli.exe` relative to the `cli` folder.
+
+You can also install via `go install`:
+
 ```bash
 go install github.com/akolybelnikov/aoc-cli@latest
 ```
 
-### First Time Setup
+## Quick usage
 
-**Important:** Before using the bootstrap command, you need to authenticate with your Advent of Code session token:
+Generate a day's solution scaffold and download the puzzle input (default behavior):
 
 ```bash
-aoc-cli auth
+aoc-cli bootstrap --day 1 --path /path/to/project --lang elixir
 ```
 
-The CLI will prompt you for your session token and store it securely in `~/.aoc-session`. This is required to download puzzle inputs automatically.
+If you only want to create the template files and skip downloading the input (handy when offline or when you don't have a valid session):
 
-See the [Auth - Session Management](#auth---session-management) section below for details on how to get your session token.
-
-## Bootstrap a day's solution and download your puzzle inputs
-
-The `bootstrap` command helps you quickly set up your solution for a specific day and download the corresponding puzzle 
-inputs. It creates a new solution directory for the given day and populates it with the necessary boilerplate code.
-
-### Supported Languages
-
-The CLI supports multiple languages for bootstrapping solutions:
-- **Go** (default) - Creates files in `cmd/dayXX/`
-- **Elixir** - Creates files in `lib/` and `test/`
-- **Rust** - Creates files in `src/bin/dayXX/`
-
-### Examples
-
-Bootstrap a Go solution (default):
-```shell
-aoc-cli bootstrap --day 5 --path /projects/my-project
+```bash
+aoc-cli bootstrap --day 1 --path /path/to/project --lang elixir --no-download
 ```
 
-Bootstrap an Elixir solution:
-```shell
-aoc-cli bootstrap --day 5 --path /projects/my-project --lang elixir
+You can override the template source and point the CLI at a local `templates` folder (useful when debugging or developing templates):
+
+```bash
+aoc-cli bootstrap --day 1 --path /path/to/project --lang elixir --templates-path /path/to/cli/internal/templates --no-download
 ```
 
-Bootstrap a Rust solution:
-```shell
-aoc-cli bootstrap --day 5 --path /projects/my-project --lang rust
+Supported languages:
+- `go` (default) — creates `cmd/dayXX/`
+- `elixir` — creates `lib/` and `test/`
+- `rust` — creates `src/bin/dayXX/`
+
+## Flags summary
+
+- `--day, -d` — Day number (1–25)
+- `--path, -p` — Project root where files will be created
+- `--lang, -l` — Language (`go`, `elixir`, `rust`)
+- `--templates-path` — Optional override to load templates from a local folder instead of embedded assets
+- `--no-download` — Create templates but skip downloading the puzzle input
+- `--year, -y` — Advent of Code year (defaults to the current year)
+
+## Auth / Session management
+
+The CLI requires your Advent of Code session cookie to download inputs. The session token is stored in a file named `.aoc-session` in your home directory (for example, `C:\Users\<you>\.aoc-session` on Windows).
+
+How to obtain the session token:
+1. Log into https://adventofcode.com
+2. Open Developer Tools -> Application -> Cookies
+3. Copy the value of the `session` cookie
+4. Run `aoc-cli auth` (if implemented) or manually create the file `~/.aoc-session` and paste the token on a single line
+
+Notes:
+- The CLI trims whitespace when reading the session token. If you paste with a newline, that will be handled.
+- If session validation fails, the CLI will print a helpful message and stop; re-run `aoc-cli auth` or update `~/.aoc-session` with a fresh token.
+
+## Troubleshooting
+
+Templates not found (Windows / embed-related issue)
+- Symptom: `Failed to copy template: open templates\elixir: file does not exist` or similar.
+- Cause: Go's `embed.FS` uses forward slashes (`/`) for paths even on Windows. If code constructs the template path using `filepath.Join`, Windows backslashes may be passed to the embedded FS, which prevents files from being found.
+- Fixes:
+  1. Use the built-in embedded templates (the CLI does this by default). If you see the error, rebuild the CLI from the repository's `cli` directory (so embedded assets are included) and try again.
+  2. Use `--templates-path` to point to a local `templates` directory (for example, `cli/internal/templates`).
+  3. As a quick workaround, run `aoc-cli` from the repository root where a `templates/` folder exists or copy the `templates` folder next to the binary.
+
+Download returns 400 (Bad Request) or authentication errors
+- Symptom: `Failed to download https://adventofcode.com/2025/day/1/input: 400 Bad Request` or `401 Unauthorized`.
+- Causes & fixes:
+  - No session token present or the token is empty. Ensure `~/.aoc-session` exists and contains the `session` token on a single line.
+  - Session token expired or invalid. Re-obtain the `session` cookie and re-run `aoc-cli auth` (or update the file) to refresh it.
+  - AoC sometimes rejects requests without a standard `User-Agent`. The CLI now sets a User-Agent header but if you still see errors, try the `--no-download` flag to just scaffold templates and debug auth separately.
+
+To debug authentication:
+- Check the `.aoc-session` file exists and is non-empty.
+
+PowerShell example (check file size):
+
+```powershell
+# Check session file
+Get-Item $env:USERPROFILE\.aoc-session | Select-Object Name, Length
 ```
 
-### What Gets Created
+If the file is missing or empty, create it and paste your session value.
 
-**For Go:**
-- `cmd/day05/day05.go` - Solution file with `part1()` and `part2()` functions
-- `cmd/day05/day05_test.go` - Test file
-- `inputs/day05.txt` - Input file (if session is configured)
+## Development notes / Contributing
 
-**For Elixir:**
-- `lib/day05.ex` - Solution module with `part1()`, `part2()`, and `solve()` functions
-- `test/day05_test.exs` - ExUnit test file
-- `inputs/day05.txt` - Input file (if session is configured)
+- Templates are embedded into the CLI with Go `//go:embed` and are located under `cli/internal/templates` in the repository.
+- When updating templates, rebuild the CLI so embedded assets are included.
+- Tests and PRs are welcome.
 
-**For Rust:**
-- `src/bin/day05/main.rs` - Solution binary with `part1()`, `part2()`, and tests
-- `inputs/day05.txt` - Input file (if session is configured)
+## Example: Full flow (build, bootstrap, download)
 
-If valid session credentials are already configured, the input file will be downloaded automatically.
+```bash
+cd /c/Users/akoly/GolandProjects/advent-of-code/cli
+go build -o ../bin/aoc-cli.exe main.go
+../bin/aoc-cli.exe bootstrap --day 1 --path /c/Users/akoly/GolandProjects/advent-of-code/2025/elixir --lang elixir
+```
 
-## Auth - Session Management
+If you want to avoid network calls while iterating on templates:
 
-### Why Session Management?
-Advent of Code (AoC) puzzles and inputs require authentication. AoC uses a session cookie (`session` token) to verify users. 
-This CLI stores the session locally, allowing automated puzzle downloads without repeated logins.
+```bash
+../bin/aoc-cli.exe bootstrap --day 1 --path /c/Users/akoly/GolandProjects/advent-of-code/2025/elixir --lang elixir --no-download
+```
 
-### How It Works:
-1. **First Run (No Session Found):**
-    - CLI checks for `.aoc-session` in the user's home directory.
-    - If not found, the CLI prompts for the session token.
-    - The token is saved securely in `.aoc-session` (with `0600` permissions).
+## License
 
-2. **Subsequent Runs (Session Exists):**
-    - CLI reads the token from `.aoc-session`.
-    - The token is used to authenticate and fetch puzzles/inputs.
-
-3. **Security:**
-    - Token stored with restricted permissions (user-only read/write).
+This project follows the repository license (see top-level `LICENSE`).
 
 ---
 
-### How to Get Your Session Token:
-1. Log in to [Advent of Code](https://adventofcode.com).
-2. Open Developer Tools (`F12` or `Ctrl+Shift+I`).
-3. Navigate to **Application** -> **Cookies**.
-4. Copy the value of the `session` cookie.
-5. Paste it into the CLI when prompted.
+If you want, I can also:
+- Add a short example showing the contents of generated Elixir/Go/Rust templates, or
+- Add a one-line `--verbose` log that prints which template source the CLI chose at runtime.
 
----
-
-### Notes:
-- **Session Expiry:** If the session expires, the CLI will prompt for a new token.
-- **No Auto-Login:** The CLI cannot extract the session directly from your browser for security reasons.
-- **No OAuth:** AoC does not offer an API, so session cookies are the only way to authenticate.
-
----
-
-This method keeps authentication simple and mirrors the manual download process while enabling automation.
-
+Pick one and I'll add it to the README and (optionally) the CLI.

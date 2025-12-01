@@ -6,20 +6,24 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/akolybelnikov/aoc-cli/internal"
-	"github.com/akolybelnikov/aoc-cli/internal/auth"
-	"github.com/akolybelnikov/aoc-cli/internal/download"
 	"io/fs"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/akolybelnikov/aoc-cli/internal"
+	"github.com/akolybelnikov/aoc-cli/internal/auth"
+	"github.com/akolybelnikov/aoc-cli/internal/download"
 
 	"github.com/spf13/cobra"
 )
 
 var downloadPath string
 var language string
+var templatesPath string
+var skipDownload bool
 
 // bootstrapCmd represents the bootstrap command
 var bootstrapCmd = &cobra.Command{
@@ -93,15 +97,28 @@ Downloaded input will be stored in the /inputs directory.`,
 
 		fmt.Printf("Package for Day %02d created successfully!\n", day)
 
+		// If user requested to skip downloading inputs, we're done
+		if skipDownload {
+			fmt.Println("Skipping input download as requested (--no-download).")
+			return
+		}
+
 		session, err := auth.GetSession()
 		if err != nil {
 			fmt.Println("Invalid or expired session. Please run auth to update your session.")
 			return
 		}
 
+		// If session file read succeeded but returned empty content, prompt the user to run auth
+		if strings.TrimSpace(session) == "" {
+			fmt.Println("No session token found. Please run 'aoc-cli auth' to save your session token.")
+			return
+		}
+
 		err = auth.ValidateSession(session, downloadYear)
 		if err != nil {
-			fmt.Println("Invalid session. Please run auth to update your session.")
+			fmt.Printf("Invalid session: %v. Please run 'aoc-cli auth' to refresh your session.\n", err)
+			return
 		}
 
 		err = download.Input(downloadYear, day, session, downloadPath)
@@ -119,21 +136,60 @@ func init() {
 	bootstrapCmd.Flags().IntVarP(&downloadYear, "year", "y", 0, "Advent of Code year (default: current year)")
 	bootstrapCmd.Flags().StringVarP(&downloadPath, "path", "p", "", "Custom path for downloading files")
 	bootstrapCmd.Flags().StringVarP(&language, "lang", "l", "go", "Language for the solution (go, elixir, rust)")
+	// allow overriding where templates are loaded from (root of templates folder)
+	bootstrapCmd.Flags().StringVar(&templatesPath, "templates-path", "", "Custom templates root path (overrides embedded templates)")
+	bootstrapCmd.Flags().BoolVar(&skipDownload, "no-download", false, "Skip downloading the puzzle input after bootstrapping templates")
 	rootCmd.AddCommand(bootstrapCmd)
 }
 
 // copyTemplate copies files from templatePath to targetPath
 func copyTemplate(targetPath string) error {
 	dayStr := fmt.Sprintf("%02d", day)
-	templateDir := filepath.Join("templates", language)
+	// embedded FS uses forward slashes
+	embeddedDir := path.Join("templates", language)
 
-	return fs.WalkDir(internal.Templates, templateDir, func(path string, d fs.DirEntry, err error) error {
+	// decide which fs to use: prefer an explicit templatesPath if provided, otherwise embedded
+	var tplFS fs.FS = internal.Templates
+	var templateDir string = embeddedDir
+
+	if templatesPath != "" {
+		// templatesPath is expected to point to the templates root (so language subdir exists beneath it)
+		tplFS = os.DirFS(templatesPath)
+		templateDir = language
+	}
+
+	// Verify that the chosen fs actually contains the templates; try fallbacks if not
+	if _, err := fs.ReadDir(tplFS, templateDir); err != nil {
+		// first fallback: embedded templates
+		if tplFS != internal.Templates {
+			if _, err2 := fs.ReadDir(internal.Templates, embeddedDir); err2 == nil {
+				tplFS = internal.Templates
+				templateDir = embeddedDir
+			} else if _, err3 := fs.ReadDir(os.DirFS("."), embeddedDir); err3 == nil {
+				// second fallback: current working directory's templates folder
+				tplFS = os.DirFS(".")
+				templateDir = embeddedDir
+			} else {
+				return fmt.Errorf("templates directory not found in provided path, embedded assets, or current directory")
+			}
+		} else {
+			// tplFS is embedded but templates not present there; try current directory
+			if _, err3 := fs.ReadDir(os.DirFS("."), embeddedDir); err3 == nil {
+				tplFS = os.DirFS(".")
+				templateDir = embeddedDir
+			} else {
+				return fmt.Errorf("templates directory '%s' not found in embedded assets or current directory", embeddedDir)
+			}
+		}
+	}
+
+	return fs.WalkDir(tplFS, templateDir, func(fpath string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
 
 		// Skip the template directory itself
-		if path == templateDir {
+		if fpath == templateDir {
 			return nil
 		}
 
@@ -141,8 +197,8 @@ func copyTemplate(targetPath string) error {
 			return nil
 		}
 
-		// Read file content from embedded template
-		content, err := internal.Templates.ReadFile(path)
+		// Read file content from the selected template FS
+		content, err := fs.ReadFile(tplFS, fpath)
 		if err != nil {
 			return err
 		}
@@ -151,7 +207,7 @@ func copyTemplate(targetPath string) error {
 		updatedContent := strings.ReplaceAll(string(content), "{{DAY}}", dayStr)
 
 		var destPath string
-		fileName := filepath.Base(path)
+		fileName := filepath.Base(fpath)
 
 		if language == "go" {
 			updatedContent = strings.ReplaceAll(updatedContent, "package templates", "package main")
