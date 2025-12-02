@@ -7,13 +7,13 @@ defmodule Day02Test do
 
   describe "part 1" do
     test "sample input" do
-      expected = 0
+      expected = 1227775554
       actual = Day02.part1(@sample_input)
       assert actual == expected
     end
 
     test "real input" do
-      expected = 0
+      expected = 38310256125
       actual = Day02.part1(@input)
       assert actual == expected
     end
@@ -21,13 +21,13 @@ defmodule Day02Test do
 
   describe "part 2" do
     test "sample input" do
-      expected = 0
+      expected = 4174379265
       actual = Day02.part2(@sample_input)
       assert actual == expected
     end
 
     test "real input" do
-      expected = 0
+      expected = 58961152806
       actual = Day02.part2(@input)
       assert actual == expected
     end
