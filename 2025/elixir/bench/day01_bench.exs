@@ -11,5 +11,5 @@ Benchee.run(
   inputs: inputs,
   time: 3,
   memory_time: 2,
-  formatters: [{Benchee.Formatters.HTML, file: "bench/bench.html"}]
+  formatters: [{Benchee.Formatters.HTML, file: "bench/day01/bench.html"}]
 )

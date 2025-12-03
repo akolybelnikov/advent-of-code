@@ -18,13 +18,15 @@ defmodule Day03Test do
   end
 
   test "part 2 sample" do
-    expected = 0
+    # Sum of picked-only 12-digit prefixes per line
+    # 987654321111 + 811111111119 + 434234234278 + 888911112111
+    expected = 3_121_910_778_619
     actual = Day03.part2(@sample_input)
     assert actual == expected
   end
 
-   test "part 2" do
-    expected = 0
+  test "part 2" do
+    expected = 168_798_209_663_590
     actual = Day03.part2(@input)
     assert actual == expected
   end
@@ -70,11 +72,11 @@ defmodule Day03Test do
   end
 
   describe "largest_last/2" do
-    test "returns [9,8] when comparing [9,8] and [9,7]" do
-      assert Day03.largest_last(~c"38", ~c"97") == ~c"38"
+    test "returns [3,8] when comparing [3,7] and [9,8]" do
+      assert Day03.largest_last(~c"37", ~c"98") == ~c"38"
     end
 
-    test "returns [9,7] when comparing [9,5] and [9,7]" do
+    test "returns [9,7] when comparing [9,5] and [1,7]" do
       assert Day03.largest_last(~c"95", ~c"17") == ~c"97"
     end
 
@@ -88,6 +90,28 @@ defmodule Day03Test do
 
     test "returns [1,9] when comparing [1,2] and [1,9]" do
       assert Day03.largest_last(~c"12", ~c"19") == ~c"19"
+    end
+  end
+
+  describe "find_max_joltage_12/1 (picked-only prefix)" do
+    test "line 1: 987654321111111 -> 987654321111" do
+      result = Day03.find_max_joltage_12("987654321111111")
+      assert List.to_integer(result) == 987_654_321_111
+    end
+
+    test "line 2: 811111111111119 -> 811111111119" do
+      result = Day03.find_max_joltage_12("811111111111119")
+      assert List.to_integer(result) == 811_111_111_119
+    end
+
+    test "line 3: 234234234234278 -> 434234234234" do
+      result = Day03.find_max_joltage_12("234234234234278")
+      assert List.to_integer(result) == 434_234_234_278
+    end
+
+    test "line 4: 818181911112111 -> 888911112111" do
+      result = Day03.find_max_joltage_12("818181911112111")
+      assert List.to_integer(result) == 888_911_112_111
     end
   end
 end

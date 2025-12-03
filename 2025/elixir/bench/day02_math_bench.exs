@@ -13,7 +13,7 @@ Benchee.run(%{
   warmup: 2,
   memory_time: 2,
   formatters: [
-    {Benchee.Formatters.HTML, file: "bench/day02_math_bench.html"},
+    {Benchee.Formatters.HTML, file: "bench/day02_math/bench.html"},
     Benchee.Formatters.Console
   ]
 )

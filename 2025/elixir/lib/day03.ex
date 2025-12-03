@@ -13,18 +13,10 @@ defmodule Day03 do
     |> Enum.sum_by(&find_max_joltage/1)
   end
 
-  @doc """
-  Solves Part 2
-  """
-  def part2(input) do
-    IO.puts(input)
-    0
-  end
-
   def find_max_joltage(battery) do
     String.trim(battery)
     |> String.to_charlist()
-    |> Enum.chunk_every(2, 1, :discard)
+    |> Stream.chunk_every(2, 1, :discard)
     |> Enum.reduce([?0, ?0], &by_max_sequence/2)
     |> List.to_integer()
   end
@@ -50,8 +42,46 @@ defmodule Day03 do
   end
 
   @doc """
+  Solves Part 2
+  """
+  def part2(input) do
+    input
+    |> String.trim()
+    |> String.split("\n")
+    |> Stream.map(&String.trim/1)
+    |> Stream.map(&String.to_charlist/1)
+    |> Stream.map(&pick_max12_prefix/1)
+    |> Stream.map(&List.to_integer/1)
+    |> Enum.sum()
+  end
+
+  def find_max_joltage_12(battery) do
+    String.trim(battery) |> String.to_charlist() |> pick_max12_prefix()
+  end
+
+  # Picks the lexicographically largest subsequence of length 12 using a greedy stack.
+  defp pick_max12_prefix(charlist) do
+    k = 12
+    removals = length(charlist) - k
+
+    {stack_rev, _rem} =
+      Enum.reduce(charlist, {[], removals}, fn ch, {stack, rem} ->
+        {stack_after, rem_after} = pop_smaller(stack, rem, ch)
+        {[ch | stack_after], rem_after}
+      end)
+
+    stack = Enum.reverse(stack_rev)
+    Enum.take(stack, k)
+  end
+
+  defp pop_smaller([s | rest], rem, ch) when s < ch and rem > 0 do
+    pop_smaller(rest, rem - 1, ch)
+  end
+
+  defp pop_smaller(stack, rem, _ch), do: {stack, rem}
+
+  @doc """
   Reads input file and runs both parts
-  811111111111119
   """
   def solve do
     input = read_input()
