@@ -23,6 +23,6 @@ erl_crash.dump
 aoc2025-*.tar
 
 # Ignore generated benchmark HTML files and auto-generated benchmarks/ folder
-/bench/*.html
-/bench/assets/
+/bench/**/*.html
+/bench/**/assets/
 /benchmarks/

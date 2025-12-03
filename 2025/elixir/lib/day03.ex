@@ -10,35 +10,11 @@ defmodule Day03 do
     input
     |> String.trim()
     |> String.split("\n")
-    |> Enum.sum_by(&find_max_joltage/1)
-  end
-
-  def find_max_joltage(battery) do
-    String.trim(battery)
-    |> String.to_charlist()
-    |> Stream.chunk_every(2, 1, :discard)
-    |> Enum.reduce([?0, ?0], &by_max_sequence/2)
-    |> List.to_integer()
-  end
-
-  def by_max_sequence(next, cur) do
-    if to_num(next) > to_num(cur) do
-      next
-    else
-      largest_last(cur, next)
-    end
-  end
-
-  def to_num([a, b]) do
-    10 * (a - ?0) + (b - ?0)
-  end
-
-  def largest_last([a, b], [_, d]) do
-    if b > d do
-      [a, b]
-    else
-      [a, d]
-    end
+    |> Stream.map(&String.trim/1)
+    |> Stream.map(&String.to_charlist/1)
+    |> Stream.map(&pick_max_k_prefix(&1, 2))
+    |> Stream.map(&List.to_integer/1)
+    |> Enum.sum()
   end
 
   @doc """
@@ -50,18 +26,21 @@ defmodule Day03 do
     |> String.split("\n")
     |> Stream.map(&String.trim/1)
     |> Stream.map(&String.to_charlist/1)
-    |> Stream.map(&pick_max12_prefix/1)
+    |> Stream.map(&pick_max_k_prefix(&1, 12))
     |> Stream.map(&List.to_integer/1)
     |> Enum.sum()
   end
 
-  def find_max_joltage_12(battery) do
-    String.trim(battery) |> String.to_charlist() |> pick_max12_prefix()
+  def find_max_joltage_2(battery) do
+    String.trim(battery) |> String.to_charlist() |> pick_max_k_prefix(2)
   end
 
-  # Picks the lexicographically largest subsequence of length 12 using a greedy stack.
-  defp pick_max12_prefix(charlist) do
-    k = 12
+  def find_max_joltage_12(battery) do
+    String.trim(battery) |> String.to_charlist() |> pick_max_k_prefix(12)
+  end
+
+  # Generalized: picks the lexicographically largest subsequence of length k using a greedy stack.
+  defp pick_max_k_prefix(charlist, k) do
     removals = length(charlist) - k
 
     {stack_rev, _rem} =
