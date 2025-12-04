@@ -6,6 +6,8 @@ defmodule Day04 do
   defmodule Grid do
     defstruct [:cells, :width, :height]
 
+    @type t :: %__MODULE__{cells: map(), width: integer(), height: integer()}
+
     def new(input) do
       lines = String.split(input, "\n", trim: true)
       height = length(lines)
@@ -50,8 +52,10 @@ defmodule Day04 do
     |> Enum.count(fn {pos, char} ->
       case char do
         ?@ ->
-          count = Grid.neighbors(grid, pos)
-          |> Enum.count(fn npos -> Grid.get(grid, npos) == ?@ end)
+          count =
+            Grid.neighbors(grid, pos)
+            |> Enum.count(fn npos -> Grid.get(grid, npos) == ?@ end)
+
           count <= 3
 
         _ ->
@@ -63,9 +67,54 @@ defmodule Day04 do
   @doc """
   Solves Part 2
   """
+  @spec part2(String.t()) :: integer()
   def part2(input) do
-    IO.puts(input)
-    0
+    grid = Grid.new(input)
+    initial_count = Enum.count(grid.cells, fn {_pos, char} -> char == ?@ end)
+
+    # Keep removing cells until no more can be removed
+    final_grid = remove_until_stable(grid)
+
+    # Return the number of removed cells
+    final_count = Enum.count(final_grid.cells, fn {_pos, char} -> char == ?@ end)
+    initial_count - final_count
+  end
+
+  @spec remove_until_stable(Grid.t()) :: Grid.t()
+  defp remove_until_stable(%Grid{} = grid) do
+    # Find all cells that should be removed (@ with <= 3 @ neighbors)
+    to_remove =
+      grid.cells
+      |> Enum.filter(fn {pos, char} ->
+        case char do
+          ?@ ->
+            count =
+              Grid.neighbors(grid, pos)
+              |> Enum.count(fn npos -> Grid.get(grid, npos) == ?@ end)
+
+            count <= 3
+
+          _ ->
+            false
+        end
+      end)
+      |> Enum.map(fn {pos, _char} -> pos end)
+
+    # If no cells to remove, we're done
+    case to_remove do
+      [] ->
+        grid
+
+      positions ->
+        # Set removed cells to . and recursively check again
+        new_cells =
+          Enum.reduce(positions, grid.cells, fn pos, cells ->
+            Map.put(cells, pos, ?.)
+          end)
+
+        new_grid = %Grid{grid | cells: new_cells}
+        remove_until_stable(new_grid)
+    end
   end
 
   @doc """

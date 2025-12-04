@@ -8,8 +8,5 @@ Benchee.run(
   warmup: 2,
   time: 3,
   memory_time: 2,
-  formatters: [
-    {Benchee.Formatters.HTML, file: "bench/day03/part1_part2_comparison.html"},
-    Benchee.Formatters.Console
-  ]
+    formatters: [{Benchee.Formatters.HTML, file: "bench/day03/bench.html"}]
 )
