@@ -7,11 +7,11 @@ defmodule Day05 do
   Solves Part 1
   """
   def part1(input) do
-    [l, r] = String.split(input, "\n\n", trim: true)
+    [l, r] = String.split(input, ~r/\r?\n\r?\n/, trim: true)
 
     ranges =
       l
-      |> String.split("\n", trim: true)
+      |> String.split(~r/\r?\n/, trim: true)
       |> Enum.map(fn line ->
         [start, finish] =
           line
@@ -23,7 +23,7 @@ defmodule Day05 do
 
     ids =
       r
-      |> String.split("\n", trim: true)
+      |> String.split(~r/\r?\n/, trim: true)
       |> Enum.map(&String.to_integer/1)
 
     Enum.count(ids, fn x -> Enum.any?(ranges, fn range -> x in range end) end)
@@ -33,10 +33,10 @@ defmodule Day05 do
   Solves Part 2
   """
   def part2(input) do
-    [l, _r] = String.split(input, "\n\n", trim: true)
+    [l, _r] = String.split(input, ~r/\r?\n\r?\n/, trim: true)
 
     l
-    |> String.split("\n", trim: true)
+    |> String.split(~r/\r?\n/, trim: true)
     |> Stream.map(fn line ->
       line
       |> String.split("-", trim: true)
