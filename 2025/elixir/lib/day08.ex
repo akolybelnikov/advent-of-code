@@ -28,6 +28,7 @@ defmodule Day08 do
 
   def into_coordinates(input) do
     input
+    |> String.replace("\r", "")
     |> String.split("\n", trim: true)
     |> Enum.map(fn row ->
       [x, y, z] =
