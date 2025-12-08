@@ -9,6 +9,7 @@ defmodule Day07 do
   """
   def part1(input) do
     input
+    |> String.replace("\r", "")
     |> String.split("\n", trim: true)
     |> Enum.map(&String.to_charlist/1)
     |> then(fn [head | tail] ->
@@ -58,6 +59,7 @@ defmodule Day07 do
   """
   def part2(input) do
     input
+    |> String.replace("\r", "")
     |> String.split("\n", trim: true)
     |> Enum.map(&String.to_charlist/1)
     |> then(fn [head | tail] ->
