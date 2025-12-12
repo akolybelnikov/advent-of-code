@@ -1,4 +1,5 @@
 input = File.read!("inputs/day11.txt")
+input = File.read!("inputs/day11.txt")
 
 Benchee.run(
   %{
