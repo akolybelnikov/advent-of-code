@@ -7,13 +7,13 @@ defmodule Day12Test do
 
   describe "part 1" do
     test "sample input" do
-      expected = 0
+      expected = 2
       actual = Day12.part1(@sample_input)
       assert actual == expected
     end
 
     test "real input" do
-      expected = 0
+      expected = 557
       actual = Day12.part1(@input)
       assert actual == expected
     end
